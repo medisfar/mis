@@ -1,0 +1,33 @@
+<?php
+namespace App\Livewire\Geolocalisation\Prefectures;
+use Livewire\Component;
+use \App\Traits\PrefectureTrait;
+use \App\Models\Prefecture;
+use Livewire\WithPagination;
+class PrefectureListe extends Component {
+use PrefectureTrait;
+use WithPagination;
+protected $listeners = ['prefectureUpdate' => 'refresh'];
+
+public function refresh(){
+    $this->regions=\App\Models\Prefecture::orderBy('code','asc')->paginate(20);
+   
+}
+       protected $paginationTheme = 'bootstrap';public function render() {
+	$qr=\App\Models\Prefecture::query();
+	if($this->search!==null) 
+	$qr=\App\Models\Prefecture::where('region_id',$this->search);
+	$this->prefectures=$qr->paginate(20);
+	if($this->sid!==null) 
+	$this->unprefecture=\App\Models\Prefecture::find($this->sid);
+	return view('livewire.geolocalisation.prefectures.prefecture-liste',
+	   ['prefectures'=>$this->prefectures,'prefecture'=>$this->unprefecture]);
+}
+
+public function resetPrefecture() {
+	 $this->region_id  = '';
+	 $this->code  = '';
+	 $this->nom_prefecture  = '';
+	 $this->l_type  = '';
+}
+}

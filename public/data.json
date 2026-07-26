@@ -1,0 +1,108 @@
+[{ "id": 1,
+    "name": "Electronics",
+    "type": "category",
+    "code": "ELEC",
+    "status": "active",
+    "description": "Electronic devices category",
+    "quantity": 0,
+    "price": 0,
+    "total_value": 0,
+    "parent_id": null,
+    "children": [
+      {
+        "id": 2,
+        "name": "Laptops",
+        "type": "category",
+        "code": "LAP",
+        "status": "active",
+        "description": "Laptop computers",
+        "quantity": 150,
+        "price": 0,
+        "total_value": 0,
+        "parent_id": 1,
+        "children": [
+          {
+            "id": 3,
+            "name": "MacBook Pro 16\"",
+            "type": "product",
+            "code": "MBP16",
+            "status": "active",
+            "description": "Apple MacBook Pro 16-inch",
+            "quantity": 50,
+            "price": 2499.99,
+            "total_value": 124999.50,
+            "parent_id": 2,
+            "children": []
+          },
+          {
+            "id": 4,
+            "name": "Dell XPS 15",
+            "type": "product",
+            "code": "DXPS15",
+            "status": "active",
+            "description": "Dell XPS 15 Laptop",
+            "quantity": 75,
+            "price": 1799.99,
+            "total_value": 134999.25,
+            "parent_id": 2,
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "name": "Smartphones",
+        "type": "category",
+        "code": "PHONE",
+        "status": "active",
+        "description": "Mobile phones",
+        "quantity": 300,
+        "price": 0,
+        "total_value": 0,
+        "parent_id": 1,
+        "children": [
+          {
+            "id": 6,
+            "name": "iPhone 15 Pro",
+            "type": "product",
+            "code": "IP15P",
+            "status": "active",
+            "description": "Apple iPhone 15 Pro",
+            "quantity": 120,
+            "price": 999.99,
+            "total_value": 119998.80,
+            "parent_id": 5,
+            "children": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 7,
+    "name": "Furniture",
+    "type": "category",
+    "code": "FURN",
+    "status": "active",
+    "description": "Office and home furniture",
+    "quantity": 0,
+    "price": 0,
+    "total_value": 0,
+    "parent_id": null,
+    "children": [
+      {
+        "id": 8,
+        "name": "Office Chairs",
+        "type": "product",
+        "code": "OFCHAIR",
+        "status": "pending",
+        "description": "Ergonomic office chairs",
+        "quantity": 25,
+        "price": 299.99,
+        "total_value": 7499.75,
+        "parent_id": 7,
+        "children": []
+      }
+    ]
+  }
+]

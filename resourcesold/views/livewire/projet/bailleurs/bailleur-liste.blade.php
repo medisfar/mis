@@ -1,0 +1,41 @@
+
+
+              <x-slot name="stitre">@include('livewire.projet.menu')</x-slot>
+<div>
+<button class="btn btn-sm btn-success"
+wire:click="$dispatch('show-modal', { 
+title: 'Ajouter', 
+content: {
+type: 'component',
+ name: 'projet.bailleurs.bailleur-add',
+key: {{ rand(0,1000) }},
+params: {}
+ }
+})">Ajouter</button><br><br><div class="table-responsive">
+<table  class="table table-bordered table-striped">
+<tr>
+	<th>Code</th>
+	<th>Nom_bailleur</th>
+<th></th></tr>
+@foreach($bailleurs as $item)
+<tr>
+	<td>{{$item->code}}</td>
+	<td>{{$item->nom_bailleur}}</td>
+<td><button class="btn btn-sm btn-success"
+wire:click="$dispatch('show-modal', { 
+title: 'Modifier', 
+content: {
+type: 'component',
+ name: 'projet.bailleurs.bailleur-edit',
+key: {{ rand(0,1000) }},
+params: {id:{{$item->id}}}
+ }
+})">Modifier</button>
+ <button  class="btn btn-sm btn-danger" wire:confirm="êtes vous sûr?"  wire:click="destroyBailleur({{$item->id}})">Supprimer</button> 
+ </td>
+</tr>
+@endforeach
+</table></div>
+{{$bailleurs->links()}}
+    
+</div>

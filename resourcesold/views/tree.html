@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tree View Examples with Bootstrap 5</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        .tree-indent-1 { padding-left: 2rem !important; }
+        .tree-indent-2 { padding-left: 3.5rem !important; }
+        .tree-indent-3 { padding-left: 5rem !important; }
+        .tree-indent-4 { padding-left: 6.5rem !important; }
+        
+        .tree-line-left { 
+            border-left: 2px dashed #dee2e6; 
+            margin-left: 1rem;
+        }
+        
+        .tree-node {
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        
+        .tree-node:hover {
+            background-color: rgba(0, 123, 255, 0.05);
+        }
+        
+        .tree-node.active {
+            background-color: rgba(0, 123, 255, 0.1);
+            border-left: 3px solid #0d6efd;
+        }
+        
+        .badge-category { background-color: #d1ecf1; color: #0c5460; }
+        .badge-product { background-color: #d4edda; color: #155724; }
+        .badge-service { background-color: #f8d7da; color: #721c24; }
+        
+        .status-active { background-color: #d1e7dd; color: #0f5132; }
+        .status-inactive { background-color: #f8d7da; color: #842029; }
+        .status-pending { background-color: #fff3cd; color: #664d03; }
+        
+        .card-tree {
+            border: 1px solid rgba(0,0,0,.125);
+            margin-bottom: 0.5rem;
+        }
+        
+        .card-tree-child {
+            border-left: 3px solid #6c757d;
+            margin-left: 1.5rem;
+        }
+        
+        .table-tree > tbody > tr:hover {
+            background-color: rgba(0,0,0,.02);
+        }
+        
+        .bg-tree-light { background-color: #f8f9fa; }
+        
+        .tree-toggle {
+            width: 24px;
+            height: 24px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border-radius: 50%;
+        }
+        
+        .tree-toggle:hover {
+            background-color: rgba(0,0,0,.1);
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.3s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .detail-tab {
+            min-height: 300px;
+        }
+        
+        .value-highlight {
+            font-weight: 600;
+            color: #198754;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="container-fluid py-4">
+        <div class="row">
+            <div class="col-12">
+                <h1 class="display-6 text-primary mb-4">
+                    <i class="bi bi-diagram-3-fill"></i> Tree View Examples with Bootstrap 5
+                </h1>
+                
+                <!-- Data Structure Alert -->
+                <div class="alert alert-info mb-4">
+                    <h4 class="alert-heading">
+                        <i class="bi bi-info-circle"></i> Sample Hierarchical Data
+                    </h4>
+                    <p class="mb-0">Showing tree views with this hierarchical structure:</p>
+                    <ul class="mb-0 mt-2">
+                        <li><strong>Electronics</strong> (Category)
+                            <ul>
+                                <li><strong>Laptops</strong> (Category)
+                                    <ul>
+                                        <li><strong>MacBook Pro 16"</strong> (Product) - 50 units × $2,499.99</li>
+                                        <li><strong>Dell XPS 15</strong> (Product) - 75 units × $1,799.99</li>
+                                    </ul>
+                                </li>
+                                <li><strong>Smartphones</strong> (Category)
+                                    <ul>
+                                        <li><strong>iPhone 15 Pro</strong> (Product) - 120 units × $999.99</li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </li>
+                        <li><strong>Furniture</strong> (Category)
+                            <ul>
+                                <li><strong>Office Chairs</strong> (Product) - 25 units × $299.99</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Example 1: Basic Tree View -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-white">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-list-nested text-primary"></i> 1. Basic Tree View
+                        </h5>
+                        <p class="text-muted mb-0 small">Simple hierarchical display with expand/collapse</p>
+                    </div>
+                    <div class="card-body">
+                        <div class="list-group list-group-flush">
+                            <!-- Electronics -->
+                            <div class="list-group-item tree-node active">
+                                <div class="d-flex align-items-center">
+                                    <span class="tree-toggle me-2">
+                                        <i class="bi bi-chevron-down"></i>
+                                    </span>
+                                    <i class="bi bi-folder-fill text-primary me-2"></i>
+                                    <div class="flex-grow-1">
+                                        <span class="fw-bold">Electronics</span>
+                                        <span class="badge badge-category ms-2">Category</span>
+                                        <span class="badge status-active ms-1">Active</span>
+                                    </div>
+                                    <small class="text-muted">ELEC</small>
+                                </div>
+                            </div>
+                            
+                            <!-- Laptops -->
+                            <div class="list-group-item tree-node tree-indent-1">
+                                <div class="d-flex align-items-center">
+                                    <span class="tree-toggle me-2">
+                                        <i class="bi bi-chevron-down"></i>
+                                    </span>
+                                    <i class="bi bi-folder text-info me-2"></i>
+                                    <div class="flex-grow-1">
+                                        <span>Laptops</span>
+                                        <span class="badge badge-category ms-2">Category</span>
+                                        <span class="badge status-active ms-1">Active</span>
+                                    </div>
+                                    <small class="text-muted">LAP</small>
+                                </div>
+                            </div>
+                            
+                            <!-- MacBook Pro -->
+                            <div class="list-group-item tree-node tree-indent-2">
+                                <div class="d-flex align-items-center">
+                                    <span class="me-4"></span>
+                                    <i class="bi bi-box-seam text-success me-2"></i>
+                                    <div class="flex-grow-1">
+                                        <span>MacBook Pro 16"</span>
+                                        <span class="badge badge-product ms-2">Product</span>
+                                        <span class="badge status-active ms-1">Active</span>
+                                    </div>
+                                    <div class="text-end">
+                                        <div class="fw-semibold">50 units</div>
+                                        <div class="value-highlight">$2,499.99</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Dell XPS -->
+                            <div class="list-group-item tree-node tree-indent-2">
+                                <div class="d-flex align-items-center">
+                                    <span class="me-4"></span>
+                                    <i class="bi bi-box-seam text-success me-2"></i>
+                                    <div class="flex-grow-1">
+                                        <span>Dell XPS 15</span>
+                                        <span class="badge badge-product ms-2">Product</span>
+                                        <span class="badge status-active ms-1">Active</span>
+                                    </div>
+                                    <div class="text-end">
+                                        <div class="fw-semibold">75 units</div>
+                                        <div class="value-highlight">$1,799.99</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Smartphones (Collapsed) -->
+                            <div class="list-group-item tree-node tree-indent-1">
+                                <div class="d-flex align-items-center">
+                                    <span class="tree-toggle me-2">
+                                        <i class="bi bi-chevron-right"></i>
+                                    </span>
+                                    <i class="bi bi-folder text-info me-2"></i>
+                                    <div class="flex-grow-1">
+                                        <span>Smartphones</span>
+                                        <span class="badge badge-category ms-2">Category</span>
+                                        <span class="badge status-active ms-1">Active</span>
+                                    </div>
+                                    <small class="text-muted">PHONE</small>
+                                </div>
+                            </div>
+                            
+                            <!-- Furniture (Collapsed) -->
+                            <div class="list-group-item tree-node">
+                                <div class="d-flex align-items-center">
+                                    <span class="tree-toggle me-2">
+                                        <i class="bi bi-chevron-right"></i>
+                                    </span>
+                                    <i class="bi bi-folder-fill text-warning me-2"></i>
+                                    <div class="flex-grow-1">
+                                        <span class="fw-bold">Furniture</span>
+                                        <span class="badge badge-category ms-2">Category</span>
+                                        <span class="badge status-active ms-1">Active</span>
+                                    </div>
+                                    <small class="text-muted">FURN</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Example 2: Table Tree View -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-white">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-table text-primary"></i> 2. Table-Based Tree View
+                        </h5>
+                        <p class="text-muted mb-0 small">Tabular display with all fields visible</p>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-tree mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th width="40"></th>
+                                        <th>Name & Description</th>
+                                        <th>Code</th>
+                                        <th>Type</th>
+                                        <th>Status</th>
+                                        <th>Quantity</th>
+                                        <th>Price</th>
+                                        <th>Total Value</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Electronics -->
+                                    <tr class="table-light">
+                                        <td>
+                                            <span class="tree-toggle">
+                                                <i class="bi bi-chevron-down"></i>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <i class="bi bi-folder-fill text-primary me-2"></i>
+                                                <div>
+                                                    <div class="fw-bold">Electronics</div>
+                                                    <small class="text-muted">Electronic devices category</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td><span class="badge bg-light text-dark">ELEC</span></td>
+                                        <td><span class="badge badge-category">Category</span></td>
+                                        <td><span class="badge status-active">Active</span></td>
+                                        <td class="text-center">-</td>
+                                        <td class="text-center">-</td>
+                                        <td class="fw-bold">$379,998.55</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    
+                                    <!-- Laptops -->
+                                    <tr class="bg-tree-light">
+                                        <td class="tree-indent-1">
+                                            <span class="tree-toggle">
+                                                <i class="bi bi-chevron-down"></i>
+                                            </span>
+                                        </td>
+                                        <td class="tree-indent-1">
+                                            <div class="d-flex align-items-center">
+                                                <i class="bi bi-folder text-info me-2"></i>
+                                                <div>
+                                                    <div class="fw-semibold">Laptops</div>
+                                                    <small class="text-muted">Laptop computers</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td><span class="badge bg-light text-dark">LAP</span></td>
+                                        <td><span class="badge badge-category">Category</span></td>
+                                        <td><span class="badge status-active">Active</span></td>
+                                        <td class="text-center">150</td>
+                                        <td class="text-center">-</td>
+                                        <td class="fw-bold">$259,998.75</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-info">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    
+                                    <!-- MacBook Pro -->
+                                    <tr>
+                                        <td class="tree-indent-2">
+                                            <span class="text-muted">•</span>
+                                        </td>
+                                        <td class="tree-indent-2">
+                                            <div class="d-flex align-items-center">
+                                                <i class="bi bi-laptop text-success me-2"></i>
+                                                <div>
+                                                    <div>MacBook Pro 16"</div>
+                                                    <small class="text-muted">Apple MacBook Pro 16-inch</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td><span class="badge bg-light text-dark">MBP16</span></td>
+                                        <td><span class="badge badge-product">Product</span></td>
+                                        <td><span class="badge status-active">Active</span></td>
+                                        <td class="text-center">50</td>
+                                        <td class="text-end">$2,499.99</td>
+                                        <td class="fw-bold text-success">$124,999.50</td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm">
+                                                <button class="btn btn-outline-success">
+                                                    <i class="bi bi-pencil"></i>
+                                                </button>
+                                                <button class="btn btn-outline-danger">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    
+                                    <!-- Dell XPS -->
+                                    <tr>
+                                        <td class="tree-indent-2">
+                                            <span class="text-muted">•</span>
+                                        </td>
+                                        <td class="tree-indent-2">
+                                            <div class="d-flex align-items-center">
+                                                <i class="bi bi-laptop text-success me-2"></i>
+                                                <div>
+                                                    <div>Dell XPS 15</div>
+                                                    <small class="text-muted">Dell XPS 15 Laptop</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td><span class="badge bg-light text-dark">DXPS15</span></td>
+                                        <td><span class="badge badge-product">Product</span></td>
+                                        <td><span class="badge status-active">Active</span></td>
+                                        <td class="text-center">75</td>
+                                        <td class="text-end">$1,799.99</td>
+                                        <td class="fw-bold text-success">$134,999.25</td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm">
+                                                <button class="btn btn-outline-success">
+                                                    <i class="bi bi-pencil"></i>
+                                                </button>
+                                                <button class="btn btn-outline-danger">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    
+                                    <!-- Furniture -->
+                                    <tr class="table-light">
+                                        <td>
+                                            <span class="tree-toggle">
+                                                <i class="bi bi-chevron-right"></i>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <i class="bi bi-folder-fill text-warning me-2"></i>
+                                                <div>
+                                                    <div class="fw-bold">Furniture</div>
+                                                    <small class="text-muted">Office and home furniture</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td><span class="badge bg-light text-dark">FURN</span></td>
+                                        <td><span class="badge badge-category">Category</span></td>
+                                        <td><span class="badge status-active">Active</span></td>
+                                        <td class="text-center">25</td>
+                                        <td class="text-end">$299.99</td>
+                                        <td class="fw-bold">$7,499.75</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Example 3: Card Tree View -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-white">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-card-list text-primary"></i> 3. Card-Based Tree View
+                        </h5>
+                        <p class="text-muted mb-0 small">Visual cards with detailed information</p>
+                    </div>
+                    <div class="card-body">
+                        <!-- Electronics Card -->
+                        <div class="card card-tree fade-in">
+                            <div class="card-header bg-primary bg-opacity-10 d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center">
+                                    <span class="tree-toggle me-2">
+                                        <i class="bi bi-chevron-down"></i>
+                                    </span>
+                                    <i class="bi bi-folder-fill text-primary me-2"></i>
+                                    <h6 class="mb-0 fw-bold">Electronics</h6>
+                                    <span class="badge bg-light text-dark ms-2">ELEC</span>
+                                    <span class="badge status-active ms-2">Active</span>
+                                </div>
+                                <div>
+                                    <span class="text-muted me-3">2 subcategories</span>
+                                    <button class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-plus"></i> Add Child
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <p class="mb-2">Electronic devices category including laptops, smartphones, and accessories.</p>
+                                        <div class="d-flex flex-wrap gap-2">
+                                            <span class="badge bg-info bg-opacity-10 text-info">
+                                                <i class="bi bi-box"></i> 3 Products
+                                            </span>
+                                            <span class="badge bg-success bg-opacity-10 text-success">
+                                                <i class="bi bi-cash-coin"></i> $379,998.55 Total
+                                            </span>
+                                            <span class="badge bg-secondary bg-opacity-10 text-secondary">
+                                                <i class="bi bi-calendar"></i> Created: 2023-01-15
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 text-end">
+                                        <div class="h4 value-highlight">$379,998.55</div>
+                                        <small class="text-muted">Total inventory value</small>
+                                    </div>
+                                </div>
+                                
+                                <!-- Children Cards -->
+                                <div class="mt-3 ps-4 tree-line-left">
+                                    <!-- Laptops Child Card -->
+                                    <div class="card card-tree card-tree-child mb-3 fade-in">
+                                        <div class="card-header bg-info bg-opacity-10 d-flex justify-content-between align-items-center">
+                                            <div class="d-flex align-items-center">
+                                                <span class="tree-toggle me-2">
+                                                    <i class="bi bi-chevron-down"></i>
+                                                </span>
+                                                <i class="bi bi-folder text-info me-2"></i>
+                                                <h6 class="mb-0">Laptops</h6>
+                                                <span class="badge bg-light text-dark ms-2">LAP</span>
+                                                <span class="badge status-active ms-2">Active</span>
+                                            </div>
+                                            <span class="text-muted">125 units total</span>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="d-flex justify-content-between mb-2">
+                                                        <span class="text-muted">MacBook Pro 16":</span>
+                                                        <span>50 × $2,499.99 = <strong class="value-highlight">$124,999.50</strong></span>
+                                                    </div>
+                                                    <div class="d-flex justify-content-between">
+                                                        <span class="text-muted">Dell XPS 15:</span>
+                                                        <span>75 × $1,799.99 = <strong class="value-highlight">$134,999.25</strong></span>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="progress mb-2" style="height: 20px;">
+                                                        <div class="progress-bar bg-success" role="progressbar" style="width: 40%" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100">
+                                                            MacBook (40%)
+                                                        </div>
+                                                        <div class="progress-bar bg-info" role="progressbar" style="width: 60%" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100">
+                                                            Dell (60%)
+                                                        </div>
+                                                    </div>
+                                                    <small class="text-muted">Inventory distribution</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Smartphones Child Card (Collapsed) -->
+                                    <div class="card card-tree card-tree-child fade-in">
+                                        <div class="card-header bg-info bg-opacity-10 d-flex justify-content-between align-items-center">
+                                            <div class="d-flex align-items-center">
+                                                <span class="tree-toggle me-2">
+                                                    <i class="bi bi-chevron-right"></i>
+                                                </span>
+                                                <i class="bi bi-folder text-info me-2"></i>
+                                                <h6 class="mb-0">Smartphones</h6>
+                                                <span class="badge bg-light text-dark ms-2">PHONE</span>
+                                                <span class="badge status-active ms-2">Active</span>
+                                            </div>
+                                            <span class="text-muted">120 units</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Furniture Card (Collapsed) -->
+                        <div class="card card-tree fade-in">
+                            <div class="card-header bg-warning bg-opacity-10 d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center">
+                                    <span class="tree-toggle me-2">
+                                        <i class="bi bi-chevron-right"></i>
+                                    </span>
+                                    <i class="bi bi-folder-fill text-warning me-2"></i>
+                                    <h6 class="mb-0 fw-bold">Furniture</h6>
+                                    <span class="badge bg-light text-dark ms-2">FURN</span>
+                                    <span class="badge status-active ms-2">Active</span>
+                                </div>
+                                <span class="text-muted">1 product</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Example 4: Master-Detail Tree View -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-white">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-layout-split text-primary"></i> 4. Master-Detail Layout
+                        </h5>
+                        <p class="text-muted mb-0 small">Sidebar tree with detailed view panel</p>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="row g-0">
+                            <!-- Tree Sidebar -->
+                            <div class="col-md-4 border-end bg-light">
+                                <div class="p-3 border-bottom bg-white">
+                                    <div class="input-group input-group-sm">
+                                        <span class="input-group-text">
+                                            <i class="bi bi-search"></i>
+                                        </span>
+                                        <input type="text" class="form-control" placeholder="Search nodes...">
+                                        <button class="btn btn-outline-secondary" type="button">
+                                            <i class="bi bi-funnel"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="p-3">
+                                    <div class="list-group list-group-flush">
+                                        <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center active">
+                                            <div>
+                                                <i class="bi bi-folder-fill text-primary me-2"></i>
+                                                <span class="fw-semibold">Electronics</span>
+                                            </div>
+                                            <span class="badge bg-primary rounded-pill">2</span>
+                                        </a>
+                                        <a href="#" class="list-group-item list-group-item-action tree-indent-1 d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <i class="bi bi-folder text-info me-2"></i>
+                                                <span>Laptops</span>
+                                            </div>
+                                            <span class="badge bg-info rounded-pill">2</span>
+                                        </a>
+                                        <a href="#" class="list-group-item list-group-item-action tree-indent-2 d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <i class="bi bi-laptop text-success me-2"></i>
+                                                <span>MacBook Pro 16"</span>
+                                            </div>
+                                            <span class="badge bg-success rounded-pill">50</span>
+                                        </a>
+                                        <a href="#" class="list-group-item list-group-item-action tree-indent-2 d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <i class="bi bi-laptop text-success me-2"></i>
+                                                <span>Dell XPS 15</span>
+                                            </div>
+                                            <span class="badge bg-success rounded-pill">75</span>
+                                        </a>
+                                        <a href="#" class="list-group-item list-group-item-action tree-indent-1 d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <i class="bi bi-folder text-info me-2"></i>
+                                                <span>Smartphones</span>
+                                            </div>
+                                            <span class="badge bg-info rounded-pill">1</span>
+                                        </a>
+                                        <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <i class="bi bi-folder-fill text-warning me-2"></i>
+                                                <span class="fw-semibold">Furniture</span>
+                                            </div>
+                                            <span class="badge bg-warning rounded-pill">1</span>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Detail Panel -->
+                            <div class="col-md-8">
+                                <div class="p-4">
+                                    <!-- Node Header -->
+                                    <div class="d-flex justify-content-between align-items-start mb-4">
+                                        <div>
+                                            <div class="d-flex align-items-center mb-2">
+                                                <i class="bi bi-laptop fs-1 text-success me-3"></i>
+                                                <div>
+                                                    <h3 class="mb-1">MacBook Pro 16"</h3>
+                                                    <div class="d-flex align-items-center">
+                                                        <span class="badge badge-product me-2">Product</span>
+                                                        <span class="badge status-active me-2">Active</span>
+                                                        <span class="text-muted">Code: MBP16</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <p class="text-muted mb-0">
+                                                Apple MacBook Pro 16-inch with M2 Pro chip, 16GB RAM, 512GB SSD
+                                            </p>
+                                        </div>
+                                        <div class="text-end">
+                                            <div class="display-6 value-highlight mb-1">$2,499.99</div>
+                                            <small class="text-muted">Per unit</small>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Tabs -->
+                                    <ul class="nav nav-tabs mb-4" id="detailTab" role="tablist">
+                                        <li class="nav-item" role="presentation">
+                                            <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview" type="button" role="tab">
+                                                <i class="bi bi-info-circle me-1"></i> Overview
+                                            </button>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <button class="nav-link" id="financial-tab" data-bs-toggle="tab" data-bs-target="#financial" type="button" role="tab">
+                                                <i class="bi bi-cash-coin me-1"></i> Financial
+                                            </button>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <button class="nav-link" id="inventory-tab" data-bs-toggle="tab" data-bs-target="#inventory" type="button" role="tab">
+                                                <i class="bi bi-box-seam me-1"></i> Inventory
+                                            </button>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <button class="nav-link" id="details-tab" data-bs-toggle="tab" data-bs-target="#details" type="button" role="tab">
+                                                <i class="bi bi-gear me-1"></i> Details
+                                            </button>
+                                        </li>
+                                    </ul>
+                                    
+                                    <!-- Tab Content -->
+                                    <div class="tab-content detail-tab" id="detailTabContent">
+                                        <!-- Overview Tab -->
+                                        <div class="tab-pane fade show active" id="overview" role="tabpanel">
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="card mb-3">
+                                                        <div class="card-header bg-light">
+                                                            <h6 class="mb-0">Basic Information</h6>
+                                                        </div>
+                                                        <div class="card-body">
+                                                            <dl class="row mb-0">
+                                                                <dt class="col-sm-5">Category Path</dt>
+                                                                <dd class="col-sm-7">
+                                                                    <span class="text-primary">Electronics</span> → 
+                                                                    <span class="text-info">Laptops</span> → 
+                                                                    <span class="fw-bold">MacBook Pro 16"</span>
+                                                                </dd>
+                                                                
+                                                                <dt class="col-sm-5">Created Date</dt>
+                                                                <dd class="col-sm-7">October 15, 2023</dd>
+                                                                
+                                                                <dt class="col-sm-5">Last Updated</dt>
+                                                                <dd class="col-sm-7">November 20, 2023</dd>
+                                                                
+                                                                <dt class="col-sm-5">Tags</dt>
+                                                                <dd class="col-sm-7">
+                                                                    <span class="badge bg-secondary">apple</span>
+                                                                    <span class="badge bg-secondary">laptop</span>
+                                                                    <span class="badge bg-secondary">premium</span>
+                                                                </dd>
+                                                            </dl>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="card">
+                                                        <div class="card-header bg-light">
+                                                            <h6 class="mb-0">Inventory Summary</h6>
+                                                        </div>
+                                                        <div class="card-body">
+                                                            <div class="row text-center">
+                                                                <div class="col-6">
+                                                                    <div class="display-6 text-primary">50</div>
+                                                                    <small class="text-muted">In Stock</small>
+                                                                </div>
+                                                                <div class="col-6">
+                                                                    <div class="display-6 value-highlight">$124,999.50</div>
+                                                                    <small class="text-muted">Total Value</small>
+                                                                </div>
+                                                            </div>
+                                                            <div class="mt-3">
+                                                                <div class="d-flex justify-content-between mb-1">
+                                                                    <small>Stock Level</small>
+                                                                    <small class="text-success">Good</small>
+                                                                </div>
+                                                                <div class="progress" style="height: 8px;">
+                                                                    <div class="progress-bar bg-success" style="width: 80%"></div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Financial Tab -->
+                                        <div class="tab-pane fade" id="financial" role="tabpanel">
+                                            <div class="row">
+                                                <div class="col-md-4 mb-3">
+                                                    <div class="card text-center h-100">
+                                                        <div class="card-body">
+                                                            <div class="text-muted mb-2">Cost Price</div>
+                                                            <div class="h3">$1,899.99</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4 mb-3">
+                                                    <div class="card text-center h-100">
+                                                        <div class="card-body">
+                                                            <div class="text-muted mb-2">Selling Price</div>
+                                                            <div class="h3 value-highlight">$2,499.99</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4 mb-3">
+                                                    <div class="card text-center h-100">
+                                                        <div class="card-body">
+                                                            <div class="text-muted mb-2">Profit Margin</div>
+                                                            <div class="h3 text-success">31.6%</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Other tabs would have similar content -->
+                                        <div class="tab-pane fade" id="inventory" role="tabpanel">
+                                            <p>Inventory management details would appear here.</p>
+                                        </div>
+                                        <div class="tab-pane fade" id="details" role="tabpanel">
+                                            <p>Additional product specifications and details.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Comparison Section -->
+        <div class="row mt-5">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-white">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-bar-chart text-primary"></i> Comparison of Approaches
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Approach</th>
+                                        <th>Best For</th>
+                                        <th>Pros</th>
+                                        <th>Cons</th>
+                                        <th>Bootstrap Components Used</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><strong>Basic Tree</strong></td>
+                                        <td>Simple navigation, shallow hierarchies</td>
+                                        <td>Clean, minimal, fast to load</td>
+                                        <td>Limited data display</td>
+                                        <td><span class="badge bg-light text-dark me-1">List Group</span>
+                                            <span class="badge bg-light text-dark me-1">Badges</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Table-Based</strong></td>
+                                        <td>Data comparison, many fields</td>
+                                        <td>Shows all data, sortable, familiar</td>
+                                        <td>Horizontal scrolling on mobile</td>
+                                        <td><span class="badge bg-light text-dark me-1">Tables</span>
+                                            <span class="badge bg-light text-dark me-1">Buttons</span>
+                                            <span class="badge bg-light text-dark">Badges</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Card-Based</strong></td>
+                                        <td>Complex data, visual hierarchy</td>
+                                        <td>Rich display, flexible layout</td>
+                                        <td>Vertical space usage</td>
+                                        <td><span class="badge bg-light text-dark me-1">Cards</span>
+                                            <span class="badge bg-light text-dark me-1">Progress Bars</span>
+                                            <span class="badge bg-light text-dark">Badges</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Master-Detail</strong></td>
+                                        <td>Data exploration, administration</td>
+                                        <td>Best UX, full detail access</td>
+                                        <td>Complex, needs screen space</td>
+                                        <td><span class="badge bg-light text-dark me-1">Grid</span>
+                                            <span class="badge bg-light text-dark me-1">Tabs</span>
+                                            <span class="badge bg-light text-dark me-1">Forms</span>
+                                            <span class="badge bg-light text-dark">Cards</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Toggle expand/collapse functionality
+        document.querySelectorAll('.tree-toggle').forEach(toggle => {
+            toggle.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const icon = this.querySelector('i');
+                if (icon.classList.contains('bi-chevron-right')) {
+                    icon.classList.remove('bi-chevron-right');
+                    icon.classList.add('bi-chevron-down');
+                } else if (icon.classList.contains('bi-chevron-down')) {
+                    icon.classList.remove('bi-chevron-down');
+                    icon.classList.add('bi-chevron-right');
+                }
+            });
+        });
+
+        // Tree node click handling
+        document.querySelectorAll('.tree-node').forEach(node => {
+            node.addEventListener('click', function() {
+                // Remove active class from all nodes
+                document.querySelectorAll('.tree-node').forEach(n => {
+                    n.classList.remove('active');
+                });
+                // Add active class to clicked node
+                this.classList.add('active');
+            });
+        });
+
+        // Tab functionality (already handled by Bootstrap)
+        const tabEl = document.querySelector('#detailTab button[data-bs-target="#overview"]')
+        const tab = new bootstrap.Tab(tabEl)
+        
+        // Simulate tab click to initialize
+        tabEl.addEventListener('shown.bs.tab', function (event) {
+            // Tab change logic if needed
+        })
+    </script>
+</body>
+</html>

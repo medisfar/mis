@@ -1,0 +1,25 @@
+<?php
+namespace App\Livewire\Projet\Typesessions;
+use Livewire\Component;
+use \App\Traits\TypesessionTrait;
+use \App\Models\Typesession;
+class TypesessionAdd extends Component {
+use TypesessionTrait;
+protected $listeners = ['untypesessionUpdate' => 'refresh'];
+public function refresh(){
+    $this->typesessions = \App\Models\Typesession::orderBy('code','asc')->paginate(20);
+    $this->render();
+}
+public function render() {
+	$qr=\App\Models\Typesession::query();
+	$this->typesessions=$qr->paginate(20);
+	if($this->sid!==null) 
+	$this->untypesession=\App\Models\Typesession::find($this->sid);
+	$this->createTypesession($this->sid);	return view('livewire.projet.typesessions.typesession-add',
+	   ['typesessions'=>$this->typesessions,'typesession'=>$this->untypesession]);
+}
+
+public function resetTypesession() {
+	 $this->nom  = '';
+}
+}
