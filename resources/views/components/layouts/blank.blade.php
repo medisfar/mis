@@ -2,7 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <?php $dir='/gp/public/';?>
+  @php
+    // Compatible avec mis.local et localhost/mis.
+    $dir = rtrim(request()->getBasePath(), '/') . '/';
+  @endphp
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="csrf-token" content="{{ csrf_token() }}">
   <title>Adds MIS</title>

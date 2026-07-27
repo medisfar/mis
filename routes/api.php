@@ -80,5 +80,5 @@ Route::get('/allprojets', function() {
 Route::post('/submitform', function(Request $req) {
     $data = [];
  file_put_contents(public_path().'/data.txt', json_encode($req->all()));
- return ['isSuccess'=false]
+ return ['isSuccess' => false];
 });

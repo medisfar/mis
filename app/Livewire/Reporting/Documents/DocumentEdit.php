@@ -1,30 +1,27 @@
 <?php
 namespace App\Livewire\Reporting\Documents;
 use Livewire\Component;
-use \App\Traits\DocumentTrait;
-use \App\Models\Document;
-class DocumentEdit extends Component {
-use DocumentTrait;
+use \App\Traits\documentTrait;
+use \App\Models\document;
+class documentEdit extends Component {
+use documentTrait;
 public function mount($id) {
 	$this->sid=$id;
-	$this->editDocument($this->sid);}
+	$this->editdocument($this->sid);}
 protected $listeners = ['undocumentUpdate' => 'refresh'];
 public function refresh(){
-    $this->documents = \App\Models\Document::orderBy('code','asc')->paginate(20);
+    $this->Documents = \App\Models\document::orderBy('code','asc')->paginate(20);
     $this->render();
 }
 public function render() {
-	$qr=\App\Models\Document::query();
-	$this->documents=$qr->paginate(20);
+	$qr=\App\Models\document::query();
+	$this->Documents=$qr->paginate(20);
 	if($this->sid!==null) 
-	$this->undocument=\App\Models\Document::find($this->sid);
-	return view('livewire.reporting.documents.document-edit',
-	   ['documents'=>$this->documents,'document'=>$this->undocument]);
+	$this->undocument=\App\Models\document::find($this->sid);
+	return view('livewire.reporting.Documents.document-edit',
+	   ['Documents'=>$this->Documents,'document'=>$this->undocument]);
 }
 
-public function resetDocument() {
-	 $this->projet_id  = '';
-	 $this->titre  = '';
-	 $this->fichier  = '';
+public function resetdocument() {
 }
 }

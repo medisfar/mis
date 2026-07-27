@@ -1,32 +1,29 @@
 <?php
 namespace App\Livewire\Reporting\Documents;
 use Livewire\Component;
-use \App\Traits\DocumentTrait;
-use \App\Models\Document;
+use \App\Traits\documentTrait;
+use \App\Models\document;
 use Livewire\WithPagination;
-class DocumentListe extends Component {
-use DocumentTrait;
+class documentListe extends Component {
+use documentTrait;
 use WithPagination;
 
        protected $paginationTheme = 'bootstrap';protected $listeners = ['undocumentUpdate' => 'refresh'];
 public function refresh(){
-    $this->documents = \App\Models\Document::orderBy('code','asc')->paginate(20);
+    $this->Documents = \App\Models\document::orderBy('code','asc')->paginate(20);
     $this->render();
 }
 public function render() {
-	$qr=\App\Models\Document::query();
+	$qr=\App\Models\document::query();
 	if($this->search!==null) 
-	$qr=\App\Models\Document::where('projet_id',$this->search);
-	$this->documents=$qr->paginate(20);
+	$qr=\App\Models\document::where('',$this->search);
+	$this->Documents=$qr->paginate(20);
 	if($this->sid!==null) 
-	$this->undocument=\App\Models\Document::find($this->sid);
-	return view('livewire.reporting.documents.document-liste',
-	   ['documents'=>$this->documents,'document'=>$this->undocument]);
+	$this->undocument=\App\Models\document::find($this->sid);
+	return view('livewire.reporting.Documents.document-liste',
+	   ['Documents'=>$this->Documents,'document'=>$this->undocument]);
 }
 
-public function resetDocument() {
-	 $this->projet_id  = '';
-	 $this->titre  = '';
-	 $this->fichier  = '';
+public function resetdocument() {
 }
 }

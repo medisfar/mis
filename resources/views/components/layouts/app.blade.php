@@ -4,7 +4,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Adds MIS</title>
-<?php $dir='/gp/public/';?>
+@php
+  // Chemin public détecté automatiquement :
+  // /public/ sur mis.local et /mis/public/ sur localhost/mis.
+  $dir = rtrim(request()->getBasePath(), '/') . '/';
+@endphp
   <!-- Google Font: Source Sans Pro -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
@@ -16,7 +20,6 @@
     <!-- Alpine.js for Livewire -->
     
     <style>
-    <style>
 /* ============================================
    MIS BANNER - DIRECT EMBED (WILL WORK 100%)
    ============================================ */
@@ -24,7 +27,7 @@
 /* Force banner to display properly */
 .top-header {
   background: linear-gradient(135deg, #0b2b44 0%, #1a4a6f 100%) !important;
-  padding:0; 1rem 2rem !important;
+  padding: 1rem 2rem !important;
   display: flex !important;
   justify-content: space-between !important;
   align-items: center !important;
@@ -208,7 +211,7 @@
           <a href="#" class="dropdown-item">
             <!-- Message Start -->
             <div class="media">
-              <img src="/gp/public/dist/img/user1-128x128.jpg" alt="User Avatar" class="img-size-50 mr-3 img-circle">
+              <img src="{{$dir}}dist/img/user1-128x128.jpg" alt="User Avatar" class="img-size-50 mr-3 img-circle">
               <div class="media-body">
                 <h3 class="dropdown-item-title">
                   Brad Diesel
