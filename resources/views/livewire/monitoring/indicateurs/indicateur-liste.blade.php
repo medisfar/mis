@@ -2,5 +2,5 @@
 <x-slot name="stitre">@include('livewire.monitoring.menu')</x-slot>
 
 <div>
-    <livewire:monitoring.indicateurs.indicateur-outil />
+    <livewire:monitoring.indicateurs.indicateur-outil :lecture-seule="true" />
 </div>

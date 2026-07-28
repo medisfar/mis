@@ -104,12 +104,14 @@
                 @endif
             </small>
         </div>
-        <button class="btn btn-sm btn-success" wire:click="create">
-            <i class="fas fa-plus"></i> Ajouter un indicateur
-        </button>
+        @unless($lectureSeule)
+            <button class="btn btn-sm btn-success" wire:click="create">
+                <i class="fas fa-plus"></i> Ajouter un indicateur
+            </button>
+        @endunless
     </div>
 
-    @if($showForm)
+    @if(!$lectureSeule && $showForm)
         <div class="card mb-3">
             <div class="card-header bg-light">
                 <strong>{{ $editingId ? 'Modifier un indicateur' : 'Nouvel indicateur' }}</strong>
@@ -263,8 +265,10 @@
                         <td>
                             <div class="indicator-actions">
                                 <button class="btn btn-sm btn-info" wire:click="showDetail({{ $item->id }})">Voir detail</button>
-                                <button class="btn btn-sm btn-primary" wire:click="edit({{ $item->id }})"><i class="fas fa-edit"></i></button>
-                                <button class="btn btn-sm btn-danger" wire:confirm="Etes-vous sur de vouloir supprimer cet indicateur ?" wire:click="delete({{ $item->id }})"><i class="fas fa-trash"></i></button>
+                                @unless($lectureSeule)
+                                    <button class="btn btn-sm btn-primary" wire:click="edit({{ $item->id }})"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-danger" wire:confirm="Etes-vous sur de vouloir supprimer cet indicateur ?" wire:click="delete({{ $item->id }})"><i class="fas fa-trash"></i></button>
+                                @endunless
                             </div>
                         </td>
                     </tr>

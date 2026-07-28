@@ -5,6 +5,7 @@ namespace App\Livewire\Monitoring\Indicateurs;
 use App\Models\Indicateur;
 use App\Models\Projet;
 use Illuminate\Validation\Rule;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -13,6 +14,9 @@ class IndicateurOutil extends Component
     use WithPagination;
 
     protected $paginationTheme = 'bootstrap';
+
+    #[Locked]
+    public bool $lectureSeule = false;
 
     public $search = '';
     public $editingId = null;
@@ -28,6 +32,11 @@ class IndicateurOutil extends Component
     public $valeur_cible = '';
     public $valeur_actuelle = '';
     public $periode = '';
+
+    public function mount(bool $lectureSeule = false): void
+    {
+        $this->lectureSeule = $lectureSeule;
+    }
 
     public function render()
     {
@@ -56,12 +65,20 @@ class IndicateurOutil extends Component
 
     public function create()
     {
+        if ($this->lectureSeule) {
+            return;
+        }
+
         $this->resetForm();
         $this->showForm = true;
     }
 
     public function edit($id)
     {
+        if ($this->lectureSeule) {
+            return;
+        }
+
         $indicateur = $this->projectQuery()->findOrFail($id);
 
         $this->editingId = $indicateur->id;
@@ -79,6 +96,10 @@ class IndicateurOutil extends Component
 
     public function save()
     {
+        if ($this->lectureSeule) {
+            return;
+        }
+
         $projetId = $this->currentProjectId();
 
         if (! $projetId) {
@@ -134,6 +155,10 @@ class IndicateurOutil extends Component
 
     public function delete($id)
     {
+        if ($this->lectureSeule) {
+            return;
+        }
+
         $this->projectQuery()->findOrFail($id)->delete();
         $this->hideDetail();
     }
