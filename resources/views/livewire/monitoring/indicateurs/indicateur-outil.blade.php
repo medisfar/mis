@@ -96,7 +96,7 @@
 
     <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
         <div>
-            <h5 class="mb-1">Gestion des indicateurs</h5>
+            <h5 class="mb-1">{{ $lectureSeule ? 'Suivi des indicateurs' : 'Gestion des indicateurs' }}</h5>
             <small class="text-muted">
                 Cadre de resultat - sources et valeurs de suivi
                 @if($projet)
