@@ -211,9 +211,17 @@
                                         @endif
                                     </td>
                                     <td>
-                                        <a class="ptpa-action" href="{{ route('projet.activites.show', $activity->id) }}">
+                                        <button
+                                            type="button"
+                                            class="ptpa-action"
+                                            wire:click="$dispatch('show-modal', {
+                                                title: 'Suivi de l activite',
+                                                content: '',
+                                                size: 'modal-lg'
+                                            })"
+                                        >
                                             Voir
-                                        </a>
+                                        </button>
                                     </td>
                                 </tr>
                             @empty
@@ -540,10 +548,12 @@
     align-items: center;
     justify-content: center;
     min-width: 58px;
+    border: 0;
     border-radius: 6px;
     padding: 6px 10px;
     background: #173f73;
     color: #ffffff;
+    cursor: pointer;
     font-weight: 800;
     text-decoration: none;
 }
