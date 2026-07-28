@@ -15,4 +15,7 @@ public function activite(){
 public function Site(){
 	return $this->belongsTo('\App\Models\Site');
 }
+public function projet(){
+	return $this->belongsTo('\App\Models\Projet');
+}
 }

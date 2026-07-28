@@ -6,8 +6,10 @@
 @include('livewire.errors')
 <div class="row">
 <x-field nc="12" label="Tache" fd="tache"></x-field>
-<x-select nc="6" label="Activite" fd="activite_id" :options="\App\Models\Activite::tab()"></x-select>
-<x-select  nc="6" label="Site" fd="site_id" :options="\App\Models\Site::tab()"></x-select>
+<x-select nc="6" label="Activite" fd="activite_id"
+    :options="\App\Models\Activite::whereHas('composante', fn ($query) => $query->where('projet_id', session()->get('pid')))->pluck('activite','id')"></x-select>
+<x-select nc="6" label="Site" fd="site_id"
+    :options="\App\Models\Activite::find($activite_id)?->sites->pluck('nom','id') ?? collect()"></x-select>
 
 <x-field nc="3" label="Budget" fd="budget"></x-field>
 <x-field nc="3" label="Engage" fd="engage"></x-field>

@@ -22,7 +22,7 @@
 :options="\App\Models\Composante::where('projet_id',$pid)->pluck('code','id')"></x-select>
 <x-select nc="12" label="Activite" fd="activite_id" :options="\App\Models\Activite::where('composante_id',$composante_id)->pluck('activite','id')"></x-select>
 @if($activite_id)
-<x-select nc="12" label="Site" fd="site_id" :options="\App\Models\Activite::find($activite_id)->sites->pluck('nom','id')??[]"></x-select>
+<x-select nc="12" label="Site" fd="site_id" :options="\App\Models\Activite::find($activite_id)?->sites->pluck('nom','id') ?? collect()"></x-select>
 @endif
 
 <x-field nc="12" label="Tache" fd="tache"></x-field>

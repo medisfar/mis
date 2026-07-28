@@ -17,6 +17,10 @@ class Site extends Model
     public function taches() {
 	 return $this->hasMany('\App\Models\Tache');
     }
+
+    public function activites() {
+	 return $this->belongsToMany('\App\Models\Activite')->withPivot('budget');
+    }
  
      public function groupements() {
 	 return $this->hasMany('\App\Models\Groupement');

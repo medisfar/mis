@@ -1,6 +1,7 @@
 <?php
 namespace App\Traits;
 use Livewire\Component;
+use \App\Models\Activite;
 use \App\Models\Tache;
 Trait TacheTrait {
   protected $taches,$untache;
@@ -22,6 +23,10 @@ public function cancelTache() {
 	 $this->state       = 'home';
 }
 
+public function updatedActiviteId() {
+	$this->site_id = '';
+}
+
 public function createTache() {
 	 $this->state       = 'create';
  	$this->sid = null;
@@ -29,16 +34,12 @@ public function createTache() {
 }
 
 public function storeTache() {
-	$this->validate([
- 	'tache'    => 'required', 
- 	'budget'=>'required',
- 		'engage'=>'required',
- 	'activite_id'    => 'required',
- //	'site_id'    => 'required', 
- 	'date_debut'    => 'required', 
- 	'date_fin'    => 'required', 
- 	'completed'    => 'required', 
-	]);
+	$activite = $this->validateTacheContext();
+
+	if (! $activite) {
+		return;
+	}
+
 	$untache = new Tache;
 	$untache->create([
  	'tache'    => $this->tache,
@@ -49,7 +50,7 @@ public function storeTache() {
  	'date_debut'    => $this->date_debut, 
  	'date_fin'    => $this->date_fin, 
  	'completed'    => $this->completed, 
- 	'projet_id'=>\App\Models\Activite::find($this->activite_id)->composante->projet_id
+	'projet_id' => $activite->composante->projet_id,
 	]);
 	$this->resetTache();
 	 $this->dispatch('tacheUpdate');
@@ -86,18 +87,20 @@ if($this->untache != null) {
 }}
 
 public function updateTache() {
-	$this->validate([
- 	'tache'    => 'required', 
- 	'budget'=>'required',
- 		'engage'=>'required',
- 	'activite_id'    => 'required',
- //	'site_id'    => 'required',
- 	'date_debut'    => 'required', 
- 	'date_fin'    => 'required', 
- 	'completed'    => 'required', 
-	]);
+	$activite = $this->validateTacheContext();
+
+	if (! $activite) {
+		return;
+	}
+
 	if ($this->sid) {
-   $untache = Tache::find($this->sid);
+   $untache = Tache::where('projet_id', session()->get('pid'))->find($this->sid);
+
+   if (! $untache) {
+       $this->addError('tache', 'Cette tâche ne fait pas partie du projet sélectionné.');
+       return;
+   }
+
 	$untache->update([
  	'tache'    => $this->tache, 
  	'budget'    => $this->budget, 
@@ -108,7 +111,7 @@ public function updateTache() {
  	'date_fin'    => $this->date_fin, 
  	'completed'    => $this->completed, 
  	
- 	'projet_id'=>\App\Models\Activite::find($this->activite_id)->composante->projet_id
+	'projet_id' => $activite->composante->projet_id,
 	]);
 	$this->resetTache();
 	$this->dispatch('hide-modal');
@@ -118,12 +121,62 @@ public function updateTache() {
 public function destroyTache($id)
 {
  if ($id) {
-  	   $untache = Tache::find( $id);
-   	 $untache->delete();
+	   $untache = Tache::where('projet_id', session()->get('pid'))->find($id);
+
+	   if ($untache) {
+	       $untache->delete();
+	   }
 	}
 
 
 	 
+}
+
+protected function validateTacheContext(): ?Activite
+{
+	$this->validate([
+		'tache' => 'required|string|max:255',
+		'budget' => 'required|numeric|min:0',
+		'engage' => 'required|numeric|min:0',
+		'activite_id' => 'required|integer',
+		'site_id' => 'required|integer',
+		'date_debut' => 'required|date',
+		'date_fin' => 'required|date|after_or_equal:date_debut',
+		'completed' => 'required|integer|min:0|max:100',
+	]);
+
+	$projetId = (int) session()->get('pid');
+	$activite = Activite::query()
+		->with('composante')
+		->whereKey($this->activite_id)
+		->whereHas('composante', function ($query) use ($projetId) {
+			$query->where('projet_id', $projetId);
+		})
+		->first();
+
+	if (! $activite) {
+		$this->addError(
+			'activite_id',
+			'L’activité sélectionnée ne fait pas partie du projet courant.'
+		);
+
+		return null;
+	}
+
+	$siteEstAutorise = $activite->sites()
+		->where('sites.id', $this->site_id)
+		->exists();
+
+	if (! $siteEstAutorise) {
+		$this->addError(
+			'site_id',
+			'Ce site n’est pas affecté à l’activité sélectionnée.'
+		);
+
+		return null;
+	}
+
+	return $activite;
 }
 
 }
