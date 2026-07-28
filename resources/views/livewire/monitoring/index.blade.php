@@ -216,7 +216,12 @@
                                             class="ptpa-action"
                                             wire:click="$dispatch('show-modal', {
                                                 title: 'Suivi de l activite',
-                                                content: '',
+                                                content: {
+                                                    type: 'component',
+                                                    name: 'monitoring.ptpa-activite-detail',
+                                                    key: 'ptpa-activite-{{ $activity->id }}',
+                                                    params: { id: {{ $activity->id }} }
+                                                },
                                                 size: 'modal-lg'
                                             })"
                                         >
