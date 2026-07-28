@@ -500,7 +500,9 @@ Route::prefix('projet')->middleware('auth')->group(function(){
      Route::get('/indicateurs',       App\Livewire\Projet\IndicateursTabs::class)->
         name('projet.indicateurs.tabs');});
     //===============================
-Route::get('/monitoring',App\Livewire\MonitoringIndex::class)->name('monitoring.index');
+Route::get('/monitoring', App\Livewire\MonitoringIndex::class)
+    ->middleware('auth')
+    ->name('monitoring.index');
 Route::get('/excel',
         App\Livewire\ExcelValueReplacer::class)
         ->name('excel');
