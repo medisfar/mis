@@ -9,9 +9,11 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('taches', function (Blueprint $table) {
-            $table->unsignedBigInteger('projet_id')->nullable()->after('id')->index();
-        });
+        if (! Schema::hasColumn('taches', 'projet_id')) {
+            Schema::table('taches', function (Blueprint $table) {
+                $table->unsignedBigInteger('projet_id')->nullable()->after('id')->index();
+            });
+        }
 
         // Une tâche appartient au même projet que la composante de son activité.
         DB::statement(
@@ -25,9 +27,11 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::table('taches', function (Blueprint $table) {
-            $table->dropIndex(['projet_id']);
-            $table->dropColumn('projet_id');
-        });
+        if (Schema::hasColumn('taches', 'projet_id')) {
+            Schema::table('taches', function (Blueprint $table) {
+                $table->dropIndex(['projet_id']);
+                $table->dropColumn('projet_id');
+            });
+        }
     }
 };

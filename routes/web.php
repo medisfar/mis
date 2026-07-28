@@ -454,12 +454,20 @@ Route::middleware([
         return view('dashboard');
     })->name('dashboard');
 });
-Livewire::setScriptRoute(function ($handle) {
-    return Route::get('/gp/public/livewire/livewire.js', $handle);
+
+$livewireBasePath = rtrim(
+    str_replace('/index.php', '', parse_url(config('app.url'), PHP_URL_PATH) ?: ''),
+    '/'
+);
+
+Livewire::setScriptRoute(function ($handle) use ($livewireBasePath) {
+    return Route::get($livewireBasePath.'/livewire/livewire.js', $handle);
 });
-Livewire::setUpdateRoute(function ($handle) {
-    return Route::post('/gp/public/livewire/update', $handle);
+
+Livewire::setUpdateRoute(function ($handle) use ($livewireBasePath) {
+    return Route::post($livewireBasePath.'/livewire/update', $handle);
 });
+
 Route::get('map/{idl}',App\Livewire\LocationMap::class)->name('map');
 
 Route::get('simple-map/{lat}/{lng}',App\Livewire\SimpleMap::class)->name('smap');
@@ -820,4 +828,3 @@ Route::prefix('projet')->middleware('auth')->group(function(){Route::get('/indic
 
 
 Route::prefix('projet')->middleware('auth')->group(function(){Route::get('/odds',App\Livewire\Projet\Odds\OddListe::class)->name('projet.odds');Route::get('/odds/add',App\Livewire\Projet\Odds\OddAdd::class)->name('projet.odds.add');Route::get('/odds/{id}/edit',App\Livewire\Projet\Odds\OddEdit::class)->name('projet.odds.edit');Route::get('/odds/{id}/show',App\Livewire\Projet\Odds\OddShow::class)->name('projet.odds.show');});
-

@@ -102,11 +102,10 @@ public function decomptes(){
   
     
      public function getCompletedAttribute(){
-        $s=0;$n=0;
-        foreach($this->taches as $d){
-           $s+=$d->engage; $this->n++;}
-           if($s==0||$n==0) return 0;
-        else return $s/$n;   
-    
+        if ($this->taches->isEmpty()) {
+            return 0;
+        }
+
+        return (int) max(0, min(100, round($this->taches->avg('completed'))));
     }
 }

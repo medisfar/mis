@@ -1,6 +1,6 @@
 <div>
-<select wire:model.live="pid" wire:change="select">   
-<option>--- choisir projet ---</option>
+<select wire:model="pid" wire:change="select($event.target.value)">
+<option value="">--- choisir projet ---</option>
 @foreach($prs as $item)
 <option value="{{$item->id}}">{{$item->libelle}}</option>
 @endforeach
