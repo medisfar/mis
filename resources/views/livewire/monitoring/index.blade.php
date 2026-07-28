@@ -165,7 +165,16 @@
                                 <tr>
                                     <td>
                                         <div class="ptpa-activity-name">{{ $activity->activite }}</div>
-                                        <div class="ptpa-subline">{{ $activity->sousComposante->sous_composante ?? 'Sous-composante non renseignee' }}</div>
+                                        <div class="ptpa-subline">
+                                            @if($activity->sousComposante)
+                                                {{ $activity->sousComposante->code }}
+                                                @if($activity->sousComposante->description)
+                                                    - {{ $activity->sousComposante->description }}
+                                                @endif
+                                            @else
+                                                Sous-composante non renseignée
+                                            @endif
+                                        </div>
                                     </td>
                                     <td>
                                         <span class="ptpa-component-code">{{ $activity->composante->code ?? $composante->code ?? '-' }}</span>
