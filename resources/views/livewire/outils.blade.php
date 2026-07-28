@@ -28,7 +28,8 @@
     ['id' => 'albums', 'label' => 'Albums','content'=>'',
     'component' => 'projet.albums.album-liste'],
 
-      ['id' => 'ind', 'label' => 'Indicateurs', 'content'=>'', 'component' => 'projet.indicateurs.indicateur-liste'],
+      ['id' => 'indicateurs', 'label' => 'INDICATEUR', 'content'=>'',
+       'component' => 'monitoring.indicateurs.indicateur-outil'],
     
      ['id' => 'decomptes', 'label' => 'decomptes', 'content'=>'', 'component' => 'projet.decomptes.decompte-liste'],
 
