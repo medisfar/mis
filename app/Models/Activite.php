@@ -55,7 +55,14 @@ public function sousComposante() {
 	 return $this->belongsTo('\App\Models\Souscomposante');
     }
 public function projet() {
-	 return $this->belongsTo('\App\Models\Projet');
+	 return $this->hasOneThrough(
+         Projet::class,
+         Composante::class,
+         'id',
+         'id',
+         'composante_id',
+         'projet_id'
+     );
     }
 
 public function localite() {
@@ -69,7 +76,12 @@ public function localite() {
 	 return $this->belongsToMany('\App\Models\Site')->withPivot('budget');
     }
  public function produits() {
-     return $this->belongsToMany('\App\Models\Produit');
+     return $this->belongsToMany(Produit::class, 'activite_produit')
+         ->withPivot([
+             'id', 'ssprefecture_id', 'localite_id',
+             'indicateur_realise', 'unite', 'cout', 'commentaire',
+         ])
+         ->withTimestamps();
     }
 public function taches() {
 	 return $this->hasMany('\App\Models\Tache','activite_id');

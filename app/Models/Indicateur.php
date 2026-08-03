@@ -71,6 +71,36 @@ class Indicateur extends Model
         return $this->hasMany(Ivaleur::class);
     }
 
+    public function getRealisationAttribute(): ?int
+    {
+        $cible = (float) ($this->cible_periodique_totale ?? 0);
+
+        if ($cible <= 0) {
+            return null;
+        }
+
+        return (int) round(
+            ((float) ($this->realise_periodique_total ?? 0) / $cible) * 100
+        );
+    }
+
+    public function getStatutSuiviAttribute(): array
+    {
+        if ($this->realisation === null) {
+            return ['libelle' => 'Non renseigné', 'classe' => 'status-unreported'];
+        }
+
+        if ($this->realisation >= 90) {
+            return ['libelle' => 'Atteint', 'classe' => 'status-achieved'];
+        }
+
+        if ($this->realisation >= 45) {
+            return ['libelle' => 'En bonne voie', 'classe' => 'status-on-track'];
+        }
+
+        return ['libelle' => 'À risque', 'classe' => 'status-at-risk'];
+    }
+
     public function getFrequenceLibelleAttribute(): string
     {
         return static::frequences()[(string) $this->frequence]

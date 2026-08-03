@@ -19,11 +19,17 @@ return new class extends Migration
             }
 
             if (! Schema::hasColumn('indicateurs', 'valeur_cible')) {
-                $table->decimal('valeur_cible', 15, 2)->nullable()->after('baseline');
+                $column = $table->decimal('valeur_cible', 15, 2)->nullable();
+                if (Schema::hasColumn('indicateurs', 'baseline')) {
+                    $column->after('baseline');
+                }
             }
 
             if (! Schema::hasColumn('indicateurs', 'periode')) {
-                $table->string('periode', 100)->nullable()->after('valeur_actuelle');
+                $column = $table->string('periode', 100)->nullable();
+                if (Schema::hasColumn('indicateurs', 'valeur_actuelle')) {
+                    $column->after('valeur_actuelle');
+                }
             }
 
             if (! Schema::hasColumn('indicateurs', 'est_actif')) {
@@ -31,11 +37,17 @@ return new class extends Migration
             }
         });
 
-        if (Schema::hasColumn('indicateurs', 'activite_id')) {
+        if (
+            DB::getDriverName() === 'mysql' &&
+            Schema::hasColumn('indicateurs', 'activite_id')
+        ) {
             DB::statement('ALTER TABLE indicateurs MODIFY activite_id INT NULL');
         }
 
-        if (Schema::hasColumn('indicateurs', 'valeur_actuelle')) {
+        if (
+            DB::getDriverName() === 'mysql' &&
+            Schema::hasColumn('indicateurs', 'valeur_actuelle')
+        ) {
             DB::statement(
                 'ALTER TABLE indicateurs MODIFY valeur_actuelle DECIMAL(15, 2) NULL'
             );
@@ -54,7 +66,8 @@ return new class extends Migration
             Schema::hasColumn('indicateurs', 'projet_id') &&
             Schema::hasColumn('indicateurs', 'activite_id') &&
             Schema::hasTable('activites') &&
-            Schema::hasTable('composantes')
+            Schema::hasTable('composantes') &&
+            DB::getDriverName() === 'mysql'
         ) {
             DB::statement(
                 'UPDATE indicateurs AS i

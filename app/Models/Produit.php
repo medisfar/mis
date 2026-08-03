@@ -11,10 +11,19 @@ class Produit extends Model
 }
 
 public function activites() {
-      return $this->belongsToMany('\App\Models\Activite');
+      return $this->belongsToMany(Activite::class, 'activite_produit')
+          ->withPivot([
+              'id', 'ssprefecture_id', 'localite_id',
+              'indicateur_realise', 'unite', 'cout', 'commentaire',
+          ])
+          ->withTimestamps();
     }
 public function resultat() {
-     return $this->belongsTo('\App\Models\Resultat');
+     return $this->belongsTo(Resultat::class);
+    }
+
+public function contributions() {
+     return $this->hasMany(ActiviteProduit::class);
     }
     
 public function projet() {

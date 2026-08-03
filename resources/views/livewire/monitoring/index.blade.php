@@ -211,6 +211,7 @@
                                         @endif
                                     </td>
                                     <td>
+                                        <div class="d-flex align-items-center" style="gap: 6px;">
                                         <button
                                             type="button"
                                             class="ptpa-action"
@@ -227,6 +228,23 @@
                                         >
                                             Voir
                                         </button>
+                                        <button
+                                            type="button"
+                                            class="ptpa-action ptpa-action-map"
+                                            wire:click="$dispatch('show-modal', {
+                                                title: 'Localisation des sites',
+                                                content: {
+                                                    type: 'component',
+                                                    name: 'monitoring.ptpa-activite-map',
+                                                    key: 'ptpa-activite-map-{{ $activity->id }}',
+                                                    params: { id: {{ $activity->id }} }
+                                                },
+                                                size: 'modal-xl'
+                                            })"
+                                        >
+                                            <i class="fas fa-map-marker-alt"></i> Map
+                                        </button>
+                                        </div>
                                     </td>
                                 </tr>
                             @empty
@@ -567,6 +585,14 @@
     background: #0f2f57;
     color: #ffffff;
     text-decoration: none;
+}
+
+.ptpa-action-map {
+    background: #1f7a4d;
+}
+
+.ptpa-action-map:hover {
+    background: #155f3b;
 }
 
 @media (max-width: 768px) {

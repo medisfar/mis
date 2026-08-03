@@ -15,7 +15,7 @@ class Mission extends BaseModel
 
     public function resultats()
     {
-        return $this->hasMany('\App\Models\Resultat');
+        return $this->hasMany(Resultat::class)->orderBy('position');
     }
 
   public function allresultats()

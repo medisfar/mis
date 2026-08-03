@@ -1,8 +1,10 @@
 <?php
 use Illuminate\Support\Facades\Route;
 use \App\Http\Controllers\AnalyticsController;
-function is_parseable_date(string $date): bool {
-    return strtotime($date) !== false;
+if (! function_exists('is_parseable_date')) {
+    function is_parseable_date(string $date): bool {
+        return strtotime($date) !== false;
+    }
 }
 //==================================
 
@@ -12,6 +14,8 @@ Route::prefix('monitoring')->middleware('auth')->group(function(){
      Route::get('cadre',App\Livewire\Ptpa::class)->name('cadre');
 
      Route::get('ptpa/{id}',App\Livewire\Avancement::class)->name('ptpa');
+     Route::get('activites/{id}/carte',App\Http\Controllers\Monitoring\ActivitySitesMapController::class)
+        ->name('monitoring.activites.map');
 });
      
 //==================
@@ -455,10 +459,12 @@ Route::middleware([
     })->name('dashboard');
 });
 
-$livewireBasePath = rtrim(
-    str_replace('/index.php', '', parse_url(config('app.url'), PHP_URL_PATH) ?: ''),
-    '/'
-);
+$livewireBasePath = app()->runningUnitTests()
+    ? ''
+    : rtrim(
+        str_replace('/index.php', '', parse_url(config('app.url'), PHP_URL_PATH) ?: ''),
+        '/'
+    );
 
 Livewire::setScriptRoute(function ($handle) use ($livewireBasePath) {
     return Route::get($livewireBasePath.'/livewire/livewire.js', $handle);

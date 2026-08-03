@@ -10,10 +10,9 @@
 <body>
     <div id="map"></div>
     <script>
-        const params = new URLSearchParams(window.location.search);
-        const lat = parseFloat(params.get('lat')) || 11.5;
-        const lng = parseFloat(params.get('lng')) || 43.0;
-        const zoom = parseInt(params.get('zoom')) || 9;
+        const lat = {{ (float) $lat }};
+        const lng = {{ (float) $lng }};
+        const zoom = {{ (int) $zoom }};
         
         function initMap() {
             const map = new google.maps.Map(document.getElementById('map'), {
@@ -22,7 +21,7 @@
             });
             
             new google.maps.Marker({
-                position: { lat: {{$lat}}, lng: {{$lng}} },
+                position: { lat: lat, lng: lng },
                 map: map,
                 animation: google.maps.Animation.DROP
             });

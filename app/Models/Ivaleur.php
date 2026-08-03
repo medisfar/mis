@@ -5,13 +5,15 @@ use Illuminate\Database\Eloquent\Model;
 class Ivaleur extends Model
 {
 	public $guarded=['id'];
-	public $timestamps=false;
 
-	public static function tab(){
-	    return Bailleur::pluck('code','id')->prepend('','');
-        }
-public function bailleur_projets(){
-	return $this->hasMany(\App\Models\Bailleur_i);
-}
+    protected $casts = [
+        'valeur_cible' => 'integer',
+        'valeur' => 'integer',
+    ];
+
+    public function indicateur()
+    {
+        return $this->belongsTo(Indicateur::class);
+    }
 
 }

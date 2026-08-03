@@ -36,10 +36,10 @@ public function secteur() {
 	 return $this->belongsTo('\App\Models\Secteur');
     }
     public function produits() {
-     return $this->belongstoMany('\App\Models\Produit');
+     return $this->hasMany(Produit::class);
     }
     
     public function odds() {
-     return $this->belongstoMany('\App\Models\Odd');
+     return $this->belongsToMany(Odd::class, 'odd_resultat');
     }
 }
