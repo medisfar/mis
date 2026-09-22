@@ -5,12 +5,11 @@ use \App\Models\Echeance;
 Trait EcheanceTrait {
   protected $echeances,$unecheance;
   public  $sid,$state='home',$search;
-  public $membre_id,$montant,$date_paiement;
+  public $date_echeance,$montant_paye;
 
 public function resetEcheance() {
-	 $this->membre_id  = '';
-	 $this->montant  = '';
-	 $this->date_paiement  = '';
+	 $this->date_echeance  = '';
+	 $this->montant_paye  = '';
 }
 
 public function cancelEcheance() {
@@ -25,27 +24,24 @@ public function createEcheance() {
 
 public function storeEcheance() {
 	$this->validate([
- 	'membre_id'    => 'required', 
- 	'montant'    => 'required', 
- 	'date_paiement'    => 'required', 
+ 	'date_echeance'    => 'required', 
+ 	'montant_paye'    => 'required', 
 	]);
 	$unecheance = new Echeance;
 	$unecheance->create([
- 	'membre_id'    => $this->membre_id, 
- 	'montant'    => $this->montant, 
- 	'date_paiement'    => $this->date_paiement, 
+ 	'date_echeance'    => $this->date_echeance, 
+ 	'montant_paye'    => $this->montant_paye, 
 	]);
 	$this->resetEcheance();
-	 return redirect()->route('pret.echeances');
+	 return redirect()->route('microfinance.echeances');
 }
 
 public function showEcheance($id) {
 	 $this->state       = 'show';
  	$this->sid = $id;
 	$this->unecheance =  Echeance::find($id);
- 	$this->membre_id    = $this->unecheance->membre_id; 
- 	$this->montant    = $this->unecheance->montant; 
- 	$this->date_paiement    = $this->unecheance->date_paiement; 
+ 	$this->date_echeance    = $this->unecheance->date_echeance; 
+ 	$this->montant_paye    = $this->unecheance->montant_paye; 
 }
 
 public function editEcheance($id) {
@@ -53,26 +49,23 @@ public function editEcheance($id) {
  	$this->sid = $id;
 	$this->unecheance =  Echeance::find($id);
 if($this->unecheance != null) {
- 	$this->membre_id    = $this->unecheance->membre_id; 
- 	$this->montant    = $this->unecheance->montant; 
- 	$this->date_paiement    = $this->unecheance->date_paiement; 
+ 	$this->date_echeance    = $this->unecheance->date_echeance; 
+ 	$this->montant_paye    = $this->unecheance->montant_paye; 
 }}
 
 public function updateEcheance() {
 	$this->validate([
- 	'membre_id'    => 'required', 
- 	'montant'    => 'required', 
- 	'date_paiement'    => 'required', 
+ 	'date_echeance'    => 'required', 
+ 	'montant_paye'    => 'required', 
 	]);
 	if ($this->sid) {
    $unecheance = Echeance::find($this->sid);
 	$unecheance->update([
- 	'membre_id'    => $this->membre_id, 
- 	'montant'    => $this->montant, 
- 	'date_paiement'    => $this->date_paiement, 
+ 	'date_echeance'    => $this->date_echeance, 
+ 	'montant_paye'    => $this->montant_paye, 
 	]);
 	$this->resetEcheance();
-	 return redirect()->route('pret.echeances');
+	 return redirect()->route('microfinance.echeances');
 
 }}
 
@@ -84,7 +77,7 @@ public function destroyEcheance($id)
 	}
 
 
-	 return redirect()->route('pret.echeances');
+	 return redirect()->route('microfinance.echeances');
 }
 
 }

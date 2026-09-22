@@ -1,11 +1,34 @@
 <?php
 use Illuminate\Support\Facades\Route;
 use \App\Http\Controllers\AnalyticsController;
+use Illuminate\Http\Request;
 if (! function_exists('is_parseable_date')) {
     function is_parseable_date(string $date): bool {
         return strtotime($date) !== false;
     }
 }
+
+Route::middleware('auth')->group(function () {
+    Route::get('/users-sites', function () {
+        return view('users-sites', [
+            'users' => \App\Models\User::with('sites')->orderBy('name')->get(),
+            'sites' => \App\Models\Site::orderBy('nom')->get(),
+        ]);
+    })->name('users-sites.index');
+
+    Route::post('/users-sites', function (Request $request) {
+        $data = $request->validate([
+            'user_id' => ['required', 'exists:users,id'],
+            'site_id' => ['required', 'exists:sites,id'],
+        ]);
+
+        \App\Models\User::findOrFail($data['user_id'])
+            ->sites()
+            ->sync([$data['site_id']]);
+
+        return back()->with('status', 'Site attribué avec succès.');
+    })->name('users-sites.store');
+});
 //==================================
 
   Route::get('xlxs/{id}',[App\Http\Controllers\XlsController::class,'xls'])->name('foyers.xls');
@@ -387,68 +410,153 @@ forech($dt as $d){
 
 }
 //if($row++>100) break;
-/*
+*/
+/* Disabled unfinished import route. It contains malformed experimental array code.
 Route::get('/imp', function(){
-$row = 1;
+$localites=[];    
+$sites = [];
+$menages=[];
+$foyers=[];
+$membres=[];
+
 $tbl='';
 $c=[];
-if (($handle = fopen(public_path()."/menages.csv", "r")) !== FALSE) {
+
+$dtt=[
+    'sites'=>[],
+    'foyers'=>[],
+    'menages'=>[],
+    'membres'=>[]
+];
+
+$attrs=[];
+$attrs=[
+    'quartier'=>1,
+    'nom_enfant'=>2,
+    'nom_mere'=>3,
+     'site'=>7,
+     'foyer'=>6,
+     'facilitatrice'=>9,
+     'mere_conseillere'=>8,
+     'genre'=>11,
+     'age'=>12,
+     'tel'=>13
+ ];
+
+if (($handle = fopen(public_path()."/MCMNBaseUnifiee.csv", "r")) !== FALSE) {
     while (($data = fgetcsv($handle, 1000, ";")) !== FALSE) {
-//if($row++>100) break;
 
-                $m=\App\Models\Menage::where('chef',$data[6])->first();
-                  if($m==null){
-                  $m=new \App\Models\Menage;
-                    $m->chef=$data[6];
-                    $m->localite_id=\App\Models\Localite::where('nom_localite',$data[0])->first()->id??99;
-                    $m->conjoint='';
-                   $m->tel1=$data[7];
-                   $m->code=$data[8];
-                    $m->save();
-                }
-        //SITE
-          echo $row.' rech '.$data[2].'<br>';
-           $s=\App\Models\Site::where('id',trim($data[2]))->first();
-           if($s==null){
-            echo $row.'new site '.$data[2].'<br>';
-          $s=new \App\Models\Site;
-          $s->type_point_focal=2;
-          $s->nom_point_focal='F';
-          $s->nom='s'.$data[3];
-          $s->localite_id=$m->localite_id;
-          $s->save();
-          $ids=$s->id;
 
-      }
-      else $ids=$data[2]; 
+    
+    $dtt['sites'][$data[$attrs['site']]]=[
+                        'site'=>$data[$attrs['site']],
+                        'facilitatrice'=>$data[$attrs['facilitatrice']],
+    ];
+ $dtt['sites'][$data[$attrs['site'][$data[$attrs['foyer']]]=[
+                        'foyer'=>$data[$attrs['foyer']],
+                        'mere_conseillere'=>$data[$attrs['mere_conseillere']],
+    ];
+     $dtt['sites'][$data[$attrs['site'][$data[$attrs['foyer']]]['menages'][$data[$attrs['nom_mere']]]=[
+                        'chef'=>$data[$attrs['nom_mere']],
+                        'tel'=>$data[$attrs['tel']],
 
-      //groupe
-       $g=\App\Models\Groupement::where('nom_groupe',$data[5])->first();
-       if($g==null){
-        $g=new \App\Models\Groupement;
-        $g->nom_groupe=$data[5];
-        $g->site_id=$s->id;
-        $g->projet_id=11;
-        $g->statut=1;
-        $g->save();
-       }
+    ];
+         $dtt['sites'][$data[$attrs['site']][$data[$attrs['foyer']]]$dtt['menages'][$data[$attrs['nom_mere']]]$dtt['membres'][$data[$attrs['nom_mere']]][]=[
+                            'nom'=>$data[$attrs['nom_enfant']],
+                            'genre'=>$data[$attrs['genre']],
+                            'age'=>$data[$attrs['age']],
+    ];
 
-            $e=new \App\Models\Membre;
-            $e->menage_id=$m->id;
-             $e->nom=$data[9];
-              $e->lien_parente=2;
-              $e->code=$data[10];
 
-             $e->save();
-
-             $g->membres()->attach($e->id);
-             echo $row.' '.$data[0].'      /'.$data[2]
-
-}}
-
+    }
+}
+dd($dtt);
+});
+*/
+Route::get('/imp', function () {
+    $path = public_path('MCMNBaseUnifiee.csv');
+    abort_unless(is_readable($path), 404, 'Import file not found.');
+    $attrs = ['quartier' => 1, 'nom_enfant' => 2, 'nom_mere' => 3, 'site' => 7, 'foyer' => 6, 'facilitatrice' => 9, 'mere_conseillere' => 8, 'genre' => 11, 'age' => 12, 'tel' => 13];
+    $dtt = ['sites' => []];
+    $q = ['Wahdidaba' => 36, 'Wadidaba' => 36, 'Qurawil' => 33, 'Quarawil' => 33, 'Arhiba' => 7, 'Bâche à Eau' => 35, 'Bahache' => 35];
+    $handle = fopen($path, 'r');
+    $rowNumber = 0;
+    while (($data = fgetcsv($handle, 1000, ';')) !== false) {
+        $rowNumber++;
+        if ($rowNumber === 1) continue;
+        $site = trim($data[$attrs['site']] ?? '');
+        $foyer = trim($data[$attrs['foyer']] ?? '');
+        $mere = trim($data[$attrs['nom_mere']] ?? '');
+        if ($site === '' || $foyer === '' || $mere === '') continue;
+        if (!isset($dtt['sites'][$site])) {
+            $dtt['sites'][$site] = ['nom' => $site, 'facilitatrice' => $data[$attrs['facilitatrice']], 'localite_id' => $q[$data[$attrs['quartier']]], 'lattitude' => 11.5, 'longitude' => 43.5, 'foyers' => []];
+        }
+        if (!isset($dtt['sites'][$site]['foyers'][$foyer])) {
+            $dtt['sites'][$site]['foyers'][$foyer] = ['nom_groupe' => $foyer, 'mere_conseillere' => $data[$attrs['mere_conseillere']] ?? '', 'menages' => []];
+        }
+        if (!isset($dtt['sites'][$site]['foyers'][$foyer]['menages'][$mere])) {
+            $dtt['sites'][$site]['foyers'][$foyer]['menages'][$mere] = ['chef' => $mere, 'tel' => $data[$attrs['tel']] ?? '', 'membres' => []];
+        }
+        $dtt['sites'][$site]['foyers'][$foyer]['menages'][$mere]['membres'][] = ['nom' => $data[$attrs['nom_enfant']] ?? '', 'genre' => $data[$attrs['genre']] ?? '', 'age' => $data[$attrs['age']] ?? ''];
+    }
     fclose($handle);
+   // dd($dtt);
+    return view('imp', ['dtt' => $dtt]);
+});
 
-});*/
+Route::post('/imp/import', function () {
+    $path = public_path('MCMNBaseUnifiee.csv');
+    abort_unless(is_readable($path), 404, 'Import file not found.');
+    $attrs = ['nom_enfant' => 2, 'nom_mere' => 3, 'site' => 7, 'foyer' => 6, 'facilitatrice' => 9, 'mere_conseillere' => 8, 'genre' => 11, 'age' => 12, 'tel' => 13, 'quartier' => 1];
+    $q = ['Wahdidaba' => 36, 'Wadidaba' => 36, 'Qurawil' => 33, 'Quarawil' => 33, 'Arhiba' => 7, 'Bâche à Eau' => 35, 'Bahache' => 35];
+    DB::statement('SET FOREIGN_KEY_CHECKS=0');
+        foreach (['groupement_membre', 'menage_projet', 'site_localite', 'membres', 'menages', 'groupements', 'sites'] as $table) {
+        if (Schema::hasTable($table)) DB::table($table)->truncate();
+    }
+    DB::statement('SET FOREIGN_KEY_CHECKS=1');
+
+    DB::transaction(function () use ($path, $attrs, $q) {
+        $handle = fopen($path, 'r'); $row = 0;
+        $siteIds = $groupementIds = $menageIds = [];
+        while (($data = fgetcsv($handle, 1000, ';')) !== false) {
+            if (++$row === 1) continue;
+            $siteName = trim($data[$attrs['site']] ?? ''); $foyerName = trim($data[$attrs['foyer']] ?? ''); $chef = trim($data[$attrs['nom_mere']] ?? '');
+            if ($siteName === '' || $foyerName === '' || $chef === '') continue;
+            $localiteName = trim($data[$attrs['quartier']] ?? '');
+            $localiteId = DB::table('localites')->where('nom_localite', $localiteName)->value('id')
+                ?? ($q[$localiteName] ?? 0);
+            $siteKey = $localiteId.'|'.$siteName;
+            if (!isset($siteIds[$siteKey])) {
+                $siteIds[$siteKey] = DB::table('sites')->insertGetId(['nom' => $siteName, 'type_point_focal' => 2, 'nom_point_focal' => $data[$attrs['facilitatrice']] ?? '', 'localite_id' => $localiteId, 'projet_id' => 11, 'created_at' => now(), 'updated_at' => now()]);
+            }
+            $siteId = $siteIds[$siteKey];
+            if ($localiteId && Schema::hasTable('site_localite')) {
+                DB::table('site_localite')->insertOrIgnore(['site_id' => $siteId, 'localite_id' => $localiteId, 'created_at' => now(), 'updated_at' => now()]);
+            }
+            $groupementKey = $siteId.'|'.$foyerName;
+            if (!isset($groupementIds[$groupementKey])) {
+                $groupementIds[$groupementKey] = DB::table('groupements')->insertGetId(['nom_groupe' => $foyerName, 'site_id' => $siteId, 'projet_id' => 11, 'statut' => 1, 'mere_conseillere' => $data[$attrs['mere_conseillere']] ?? '', 'created_at' => now(), 'updated_at' => now()]);
+            }
+            $groupementId = $groupementIds[$groupementKey];
+            $menageKey = $groupementId.'|'.$chef;
+            $newMenage = false;
+            if (!isset($menageIds[$menageKey])) {
+                $menageIds[$menageKey] = DB::table('menages')->insertGetId(['localite_id' => $localiteId, 'toit_id' => 0, 'chef' => $chef, 'conjoint' => '', 'tel1' => $data[$attrs['tel']] ?? '', 'tel2' => '', 'created_at' => now(), 'updated_at' => now()]);
+                $newMenage = true;
+            }
+            $menageId = $menageIds[$menageKey];
+            if ($newMenage && Schema::hasTable('menage_projet')) {
+                DB::table('menage_projet')->insert(['menage_id' => $menageId, 'projet_id' => 11, 'created_at' => now(), 'updated_at' => now()]);
+            }
+            $membreId = DB::table('membres')->insertGetId(['menage_id' => $menageId, 'genre' => (int) ($data[$attrs['genre']] ?? 0), 'nom' => $data[$attrs['nom_enfant']] ?? '', 'date_naissance' => '1900-01-01', 'lien_parente' => 2, 'enceinte' => 0, 'created_at' => now(), 'updated_at' => now()]);
+            DB::table('groupement_membre')->insert(['groupement_id' => $groupementId, 'membre_id' => $membreId]);
+        }
+        fclose($handle);
+    });
+    return redirect('/imp')->with('status', 'Import completed.');
+})->name('imp.import');
+Route::get('/imp/import', fn () => redirect('/imp'));
+
 Route::middleware([
     'auth:sanctum',
     config('jetstream.auth_session'),
@@ -459,12 +567,7 @@ Route::middleware([
     })->name('dashboard');
 });
 
-$livewireBasePath = app()->runningUnitTests()
-    ? ''
-    : rtrim(
-        str_replace('/index.php', '', parse_url(config('app.url'), PHP_URL_PATH) ?: ''),
-        '/'
-    );
+$livewireBasePath = '/mis';
 
 Livewire::setScriptRoute(function ($handle) use ($livewireBasePath) {
     return Route::get($livewireBasePath.'/livewire/livewire.js', $handle);
@@ -510,8 +613,9 @@ Route::get('/monitoring', App\Livewire\MonitoringIndex::class)
     ->middleware('auth')
     ->name('monitoring.index');
 Route::get('/excel',
-        App\Livewire\ExcelValueReplacer::class)
+        App\Livewire\ExcelColumnMapper::class)
         ->name('excel');
+Route::get('/xlconfig', App\Livewire\Xlconfig::class)->name('xlconfig');
 Route::get('/dev/mig',App\Livewire\MigrationManager::class)->name('dev.mig');
 //Route::get('/composante/{id}/gantt',App\Livewire\Gantt::class)->name('composante.gantt');
 Route::prefix('geolocalisation')->middleware('auth')->group(function(){
@@ -747,10 +851,6 @@ Route::prefix('pret')->middleware('auth')->group(function(){Route::get('/credits
 Route::prefix('pret')->middleware('auth')->group(function(){Route::get('/echeances',App\Livewire\Pret\Echeances\EcheanceListe::class)->name('pret.echeances');Route::get('/echeances/add',App\Livewire\Pret\Echeances\EcheanceAdd::class)->name('pret.echeances.add');Route::get('/echeances/{id}/edit',App\Livewire\Pret\Echeances\EcheanceEdit::class)->name('pret.echeances.edit');Route::get('/echeances/{id}/show',App\Livewire\Pret\Echeances\EcheanceShow::class)->name('pret.echeances.show');});
 
 
-Route::prefix('dataCollect')->middleware('auth')->group(function(){Route::get('/donnees',App\Livewire\DataCollect\Donnees\DonneeListe::class)->name('dataCollect.donnees');Route::get('/donnees/add',App\Livewire\DataCollect\Donnees\DonneeAdd::class)->name('dataCollect.donnees.add');Route::get('/donnees/{id}/edit',App\Livewire\DataCollect\Donnees\DonneeEdit::class)->name('dataCollect.donnees.edit');Route::get('/donnees/{id}/show',App\Livewire\DataCollect\Donnees\DonneeShow::class)->name('dataCollect.donnees.show');});
-
-
-Route::prefix('dataCollect')->middleware('auth')->group(function(){Route::get('/donnees',App\Livewire\DataCollect\Donnees\DonneeListe::class)->name('dataCollect.donnees');Route::get('/donnees/add',App\Livewire\DataCollect\Donnees\DonneeAdd::class)->name('dataCollect.donnees.add');Route::get('/donnees/{id}/edit',App\Livewire\DataCollect\Donnees\DonneeEdit::class)->name('dataCollect.donnees.edit');Route::get('/donnees/{id}/show',App\Livewire\DataCollect\Donnees\DonneeShow::class)->name('dataCollect.donnees.show');});
 
 
 Route::prefix('datacollect')->middleware('auth')->group(function(){Route::get('/formulaires',App\Livewire\Datacollect\Formulaires\FormulaireListe::class)->name('datacollect.formulaires');Route::get('/formulaires/add',App\Livewire\Datacollect\Formulaires\FormulaireAdd::class)->name('datacollect.formulaires.add');Route::get('/formulaires/{id}/edit',App\Livewire\Datacollect\Formulaires\FormulaireEdit::class)->name('datacollect.formulaires.edit');Route::get('/formulaires/{id}/show',App\Livewire\Datacollect\Formulaires\FormulaireShow::class)->name('datacollect.formulaires.show');});
@@ -836,3 +936,12 @@ Route::prefix('projet')->middleware('auth')->group(function(){Route::get('/indic
 
 
 Route::prefix('projet')->middleware('auth')->group(function(){Route::get('/odds',App\Livewire\Projet\Odds\OddListe::class)->name('projet.odds');Route::get('/odds/add',App\Livewire\Projet\Odds\OddAdd::class)->name('projet.odds.add');Route::get('/odds/{id}/edit',App\Livewire\Projet\Odds\OddEdit::class)->name('projet.odds.edit');Route::get('/odds/{id}/show',App\Livewire\Projet\Odds\OddShow::class)->name('projet.odds.show');});
+
+
+Route::prefix('microfinance')->middleware('auth')->group(function(){Route::get('/echeances',App\Livewire\Microfinance\Echeances\EcheanceListe::class)->name('microfinance.echeances');Route::get('/echeances/add',App\Livewire\Microfinance\Echeances\EcheanceAdd::class)->name('microfinance.echeances.add');Route::get('/echeances/{id}/edit',App\Livewire\Microfinance\Echeances\EcheanceEdit::class)->name('microfinance.echeances.edit');Route::get('/echeances/{id}/show',App\Livewire\Microfinance\Echeances\EcheanceShow::class)->name('microfinance.echeances.show');});
+
+
+Route::prefix('microfinance')->middleware('auth')->group(function(){Route::get('/epargnes',App\Livewire\Microfinance\Epargnes\EpargneListe::class)->name('microfinance.epargnes');Route::get('/epargnes/add',App\Livewire\Microfinance\Epargnes\EpargneAdd::class)->name('microfinance.epargnes.add');Route::get('/epargnes/{id}/edit',App\Livewire\Microfinance\Epargnes\EpargneEdit::class)->name('microfinance.epargnes.edit');Route::get('/epargnes/{id}/show',App\Livewire\Microfinance\Epargnes\EpargneShow::class)->name('microfinance.epargnes.show');});
+
+
+Route::prefix('microfinance')->middleware('auth')->group(function(){Route::get('/credits',App\Livewire\Microfinance\Credits\CreditListe::class)->name('microfinance.credits');Route::get('/credits/add',App\Livewire\Microfinance\Credits\CreditAdd::class)->name('microfinance.credits.add');Route::get('/credits/{id}/edit',App\Livewire\Microfinance\Credits\CreditEdit::class)->name('microfinance.credits.edit');Route::get('/credits/{id}/show',App\Livewire\Microfinance\Credits\CreditShow::class)->name('microfinance.credits.show');});

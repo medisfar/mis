@@ -105,6 +105,15 @@ class FormPreview extends Component
         $d->lessession_id=$this->sid;
         $d->donnes=json_encode($this->formData);
         $d->save();
+
+		$projetId = session()->get('pid');
+		$membre = \App\Models\Membre::find($this->mid);
+
+		if ($projetId && $membre?->menage_id) {
+			$menage = \App\Models\Menage::find($membre->menage_id);
+			$menage?->projets()->syncWithoutDetaching([$projetId]);
+		}
+
         $this->dispatch('hide-modal');
         $this->dispatch('lsidupdated');
         //return redirect()->route('datacollect.lessessions.liste');

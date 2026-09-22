@@ -11,7 +11,7 @@
 <x-select nc="6" label="Activite" fd="activite_id" :options="\App\Models\Activite::where('composante_id',$cpid)->pluck('activite','id')">
 </x-select>
 
-<x-select nc="6" label="Tache" fd="tache_id" :options="\App\Models\Tache::where('activite_id',$activite_id)->pluck('tache','id')"></x-select>
+<x-select nc="6" label="Sous-activité" fd="tache_id" :options="\App\Models\Tache::where('activite_id',$activite_id)->pluck('tache','id')"></x-select>
 @if($activite_id)
 <x-select nc="6" label="Site" fd="site_id" :options="\App\Models\Activite::find($activite_id)->sites->pluck('nom','id')??[]"></x-select>
 @endif

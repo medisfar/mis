@@ -5,9 +5,10 @@ use \App\Models\Site;
 Trait SiteTrait {
   protected $sites,$unsite;
   public  $sid,$state='home',$search;
-  public $nom,$type_point_focal,$nom_point_focal,$localite_id,$lattitude,$longitude;
+  public $nom,$type_point_focal,$nom_point_focal,$projet_id,$localite_id,$lattitude,$longitude;
 
 public function resetSite() {
+     $this->projet_id = session()->get('pid');
 	 $this->nom  = '';
 	 $this->type_point_focal  = '';
 	 $this->nom_point_focal  = '';
@@ -21,6 +22,7 @@ public function cancelSite() {
 }
 
 public function createSite() {
+     $this->projet_id = session()->get('pid');
 	 $this->state       = 'create';
  	$this->sid = null;
 	$this->unsite = new Site;
@@ -29,6 +31,7 @@ public function createSite() {
 public function storeSite() {
 	$this->validate([
  	'nom'    => 'required', 
+	'projet_id'    => 'required|exists:projets,id',
  	'type_point_focal'    => 'required', 
  	'nom_point_focal'    => 'required', 
  	'localite_id'    => 'required', 
@@ -38,6 +41,7 @@ public function storeSite() {
 	$unsite = new Site;
 	$unsite->create([
  	'nom'    => $this->nom, 
+	'projet_id'    => $this->projet_id,
  	'type_point_focal'    => $this->type_point_focal, 
  	'nom_point_focal'    => $this->nom_point_focal, 
  	'localite_id'    => $this->localite_id, 
@@ -53,6 +57,7 @@ public function showSite($id) {
  	$this->sid = $id;
 	$this->unsite =  Site::find($id);
  	$this->nom    = $this->unsite->nom; 
+	$this->projet_id    = $this->unsite->projet_id;
  	$this->type_point_focal    = $this->unsite->type_point_focal; 
  	$this->nom_point_focal    = $this->unsite->nom_point_focal; 
  	$this->localite_id    = $this->unsite->localite_id; 
@@ -66,6 +71,7 @@ public function editSite($id) {
 	$this->unsite =  Site::find($id);
 if($this->unsite != null) {
  	$this->nom    = $this->unsite->nom; 
+	$this->projet_id    = $this->unsite->projet_id;
  	$this->type_point_focal    = $this->unsite->type_point_focal; 
  	$this->nom_point_focal    = $this->unsite->nom_point_focal; 
  	$this->localite_id    = $this->unsite->localite_id; 
@@ -76,6 +82,7 @@ if($this->unsite != null) {
 public function updateSite() {
 	$this->validate([
  	'nom'    => 'required', 
+	'projet_id'    => 'required|exists:projets,id',
  	'type_point_focal'    => 'required', 
  	'nom_point_focal'    => 'required', 
  	'localite_id'    => 'required', 
@@ -86,6 +93,7 @@ public function updateSite() {
    $unsite = Site::find($this->sid);
 	$unsite->update([
  	'nom'    => $this->nom, 
+	'projet_id'    => $this->projet_id,
  	'type_point_focal'    => $this->type_point_focal, 
  	'nom_point_focal'    => $this->nom_point_focal, 
  	'localite_id'    => $this->localite_id, 

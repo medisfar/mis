@@ -10,7 +10,7 @@ class Activite extends BaseModel
 	return Activite::pluck('activite','id')->prepend('','');
 }
 public static function statuts(){
-    return ['non demarrée','en cours','ùterminée'];
+    return ['non demarrée','en cours','Terminée'];
 }
 public function cmnBudget(){
         $s=0;

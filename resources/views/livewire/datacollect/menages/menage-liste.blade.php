@@ -21,6 +21,7 @@ params: {}
 	<th>Chef</th>
 	<th>Conjoint</th>
 	<th>Tel1</th>
+	<th>Nombre membres</th>
 	<th>Localite</th>
 <th></th></tr>
 @foreach($menages as $item)
@@ -30,6 +31,7 @@ params: {}
 	<td>{{$item->chef}}</td>
 	<td>{{$item->conjoint}}</td>
 	<td>{{$item->tel1}}</td>
+	<td>{{$item->membres_count}}</td>
 	<td>{{$item->Localite->nom_localite??''}}</td>
 	
 <td>

@@ -1,11 +1,11 @@
-<x-slot name="titre">Taches</x-slot>
+<x-slot name="titre">Sous-activités</x-slot>
 
               <x-slot name="stitre">@include('livewire.projet.menu')</x-slot>
 <div>
 
 @include('livewire.errors')
 <div class="row">
-<x-field nc="12" label="Tache" fd="tache"></x-field>
+<x-field nc="12" label="Sous-activité" fd="tache"></x-field>
 <x-select nc="6" label="Activite" fd="activite_id"
     :options="\App\Models\Activite::whereHas('composante', fn ($query) => $query->where('projet_id', session()->get('pid')))->pluck('activite','id')"></x-select>
 <x-select nc="6" label="Site" fd="site_id"

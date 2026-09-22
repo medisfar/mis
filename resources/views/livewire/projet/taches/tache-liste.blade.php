@@ -16,16 +16,16 @@ params: {}
 <x-select nc="3" label="Activite" fd="activite_id" :options="\App\Models\Activite::where('composante_id',$cpid)->pluck('activite','id')"></x-select>
 <x-select nc="3" label="Site" fd="site_id" :options="\App\Models\Site::where('projet_id',session()->get('pid'))->pluck('nom','id')"></x-select>
  </div>       <div class="table-responsive">
-        <table style="table-layout:fixed; width:100%" class="table table-bordered table-striped">
+        <table style="table-layout:fixed; width:100%" class="table table-bordered table-striped task-table program-table">
 <tr>
-	<th style="width:20%!important">Tache</th>
+	<th style="width:20%!important">Sous-activité</th>
 	<th style="width:20%">Activite</th>
 	<th>Site</th>  
 	<th>Debut</th>
 	<th>Fin</th>
-	<th>Budget</th>
-	<th>Engage</th>
-	<th>Avancement</th>
+	<th>Budget (USD)</th>
+	<th>Engagé (USD)</th>
+	<th class="task-progress-heading">Avancement</th>
 <th></th></tr>
 @foreach($taches as $item)
 <tr>
@@ -34,9 +34,17 @@ params: {}
 	<td>{{$item->Site->nom??''}}</td>
 	<td>{{$item->date_debut}}</td>
 	<td>{{$item->date_fin}}</td>
-		<td class="nbre">{{\App\Uts::nbf($item->budget)}}</td>
-			<td class="nbre">{{\App\Uts::nbf($item->engage)}}</td>
-	<td>{{$item->completed}}%</td>
+		<td class="nbre">{{ \App\Uts::nbf($item->budget) }} $</td>
+			<td class="nbre">{{ \App\Uts::nbf($item->engage) }} $</td>
+	@php $progress = max(0, min(100, (float) $item->completed)); @endphp
+	<td class="task-progress-cell">
+		<div class="task-progress-content">
+			<div class="progress" role="progressbar" aria-label="Avancement" aria-valuenow="{{ $progress }}" aria-valuemin="0" aria-valuemax="100">
+				<div class="progress-bar" style="width: {{ $progress }}%"></div>
+			</div>
+			<span class="task-progress-value">{{ $progress }}%</span>
+		</div>
+	</td>
 <td><button class="btn btn-sm btn-success"
 wire:click="$dispatch('show-modal', { 
 title: 'Modifier', 

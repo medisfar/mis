@@ -1,4 +1,4 @@
-<x-slot name="titre">Taches</x-slot>
+<x-slot name="titre">Sous-activités</x-slot>
 
               <x-slot name="stitre">@include('livewire.projet.menu')</x-slot>
 <div>
@@ -25,7 +25,7 @@
 <x-select nc="12" label="Site" fd="site_id" :options="\App\Models\Activite::find($activite_id)?->sites->pluck('nom','id') ?? collect()"></x-select>
 @endif
 
-<x-field nc="12" label="Tache" fd="tache"></x-field>
+<x-field nc="12" label="Sous-activité" fd="tache"></x-field>
 <x-field nc="3" label="Budget" fd="budget"></x-field>
 <x-field nc="3" label="Engage" fd="engage"></x-field>
 <x-field nc="3" label="Date_debut" fd="date_debut"></x-field>

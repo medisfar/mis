@@ -2,6 +2,7 @@
 namespace App\Traits;
 use Livewire\Component;
 use \App\Models\Groupement;
+use Illuminate\Validation\Rule;
 Trait GroupementTrait {
   protected $groupements,$ungroupement;
   public  $sid,$state='home',$search;
@@ -25,10 +26,16 @@ public function createGroupement() {
 }
 
 public function storeGroupement() {
+	$this->projet_id = session()->get('pid');
 	$this->validate([
- 	'projet_id'    => 'required', 
+	'projet_id'    => 'required|exists:projets,id',
  	'nom_groupe'    => 'required', 
- 	'site_id'    => 'required', 
+	'site_id'    => [
+		'required',
+		Rule::exists('sites', 'id')->where(
+			fn ($query) => $query->where('projet_id', $this->projet_id)
+		),
+	],
  	'statut'    => 'required', 
 	]);
 	$ungroupement = new Groupement;
@@ -39,7 +46,7 @@ public function storeGroupement() {
  	'statut'    => $this->statut, 
 	]);
 	$this->resetGroupement();
-	 return redirect()->route('datacollect.groupements');
+	 return redirect()->route($this->groupementIndexRoute());
 }
 
 public function showGroupement($id) {
@@ -79,7 +86,7 @@ public function updateGroupement() {
  	'statut'    => $this->statut, 
 	]);
 	$this->resetGroupement();
-	 return redirect()->route('datacollect.groupements');
+	 return redirect()->route($this->groupementIndexRoute());
 
 }}
 
@@ -91,7 +98,14 @@ public function destroyGroupement($id)
 	}
 
 
-	 return redirect()->route('datacollect.groupements');
+	 return redirect()->route($this->groupementIndexRoute());
+}
+
+protected function groupementIndexRoute(): string
+{
+	return str_contains(static::class, '\\Beneficiaire\\')
+		? 'beneficiaire.groupements'
+		: 'datacollect.groupements';
 }
 
 }

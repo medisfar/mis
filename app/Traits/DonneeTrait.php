@@ -42,7 +42,7 @@ public function storeDonnee() {
  	'metadonnees'    => $this->metadonnees, 
 	]);
 	$this->resetDonnee();
-	 return redirect()->route('dataCollect.donnees');
+	 return redirect()->route('datacollect.donnees');
 }
 
 public function showDonnee($id) {
@@ -86,7 +86,7 @@ public function updateDonnee() {
  	'metadonnees'    => $this->metadonnees, 
 	]);
 	$this->resetDonnee();
-	 return redirect()->route('dataCollect.donnees');
+	 return redirect()->route('datacollect.donnees');
 
 }}
 
@@ -98,7 +98,7 @@ public function destroyDonnee($id)
 	}
 
 
-	 return redirect()->route('dataCollect.donnees');
+	 return redirect()->route('datacollect.donnees');
 }
 
 }

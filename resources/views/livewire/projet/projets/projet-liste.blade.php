@@ -13,7 +13,7 @@ key: {{ rand(0,1000) }},
 params: {}
  }
 })">Ajouter</button><br><br><input type="text" wire:model.live="search"/><div class="table-responsive">
-<table  class="table table-bordered table-striped">
+<table class="table table-bordered table-striped program-table">
 <tr>
 	<th>Code</th>
 	<th>Libelle</th>

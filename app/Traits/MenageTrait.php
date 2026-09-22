@@ -27,6 +27,12 @@ public function createMenage() {
 }
 
 public function storeMenage() {
+	$projetId = session()->get('pid');
+
+	if (!$projetId) {
+		$this->addError('projet_id', 'Aucun projet courant sélectionné.');
+		return;
+	}
 
 	$this->validate([
  	'localite_id'    => 'required', 
@@ -36,8 +42,7 @@ public function storeMenage() {
  	//'tel1'    => 'required', 
  	//'tel2'    => 'required', 
 	]);
-	$unmenage = new Menage;
-	$unmenage->create([
+	$unmenage = Menage::create([
  	'localite_id'    => $this->localite_id, 
  	'toit_id'    => $this->toit_id, 
  	'chef'    => $this->chef, 
@@ -45,6 +50,7 @@ public function storeMenage() {
  	'tel1'    => $this->tel1, 
  	'tel2'    => $this->tel2, 
 	]);
+	$unmenage->projets()->syncWithoutDetaching([$projetId]);
 	$this->resetMenage();
 	 return redirect()->route('datacollect.menages');
 }

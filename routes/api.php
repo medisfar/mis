@@ -2,6 +2,10 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\DB;
+use App\Models\Credit;
+use App\Models\Echeance;
+use App\Models\Paiement;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -29,6 +33,86 @@ $d=array_merge($p->toArray(), ['id' => '' . $p->id]);
 });
 
 Route::post('/auth/login', [\App\Http\Controllers\Api\AuthController::class, 'loginUser']);
+
+// Mobile credit synchronization. Credits include their installments and the
+// optional payment so the device has everything required while offline.
+Route::get('/credits', function () {
+    return Credit::with(['echeances.paiement'])
+        ->orderByDesc('id')
+        ->get();
+});
+
+Route::get('/credit-hierarchy', function (Request $request) {
+    $query = \App\Models\Site::query()
+        ->select(['id', 'nom'])
+        ->with([
+            'groupements:id,site_id,nom_groupe',
+            'groupements.membres:id,nom,date_naissance',
+        ])
+        ->orderBy('nom');
+
+    if ($user = $request->user('sanctum')) {
+        $query->whereHas('users', fn ($sites) => $sites->where('users.id', $user->id));
+    }
+
+    return $query->get();
+});
+
+Route::get('/paiements', function () {
+    return Paiement::orderBy('id')->get();
+});
+
+Route::get('/paiements/echeance/{echeance}', function (Echeance $echeance) {
+    return Paiement::where('echeance_id', $echeance->id)->get();
+});
+
+// One installment accepts one payment. Returning an existing payment makes
+// mobile retries safe when a response was lost after the server committed it.
+Route::post('/paiements', function (Request $request) {
+    $data = $request->validate([
+        'credit_id' => ['required', 'integer', 'exists:credits,id'],
+        'echeance_id' => ['required', 'integer', 'exists:echeances,id'],
+        'date_paiement' => ['required', 'date'],
+        'montant_paye' => ['required', 'integer', 'min:1'],
+    ]);
+
+    [$paiement, $created] = DB::transaction(function () use ($data) {
+        $echeance = Echeance::where('credit_id', $data['credit_id'])
+            ->lockForUpdate()
+            ->findOrFail($data['echeance_id']);
+
+        $existing = Paiement::where('echeance_id', $echeance->id)->first();
+        if ($existing) {
+            return [$existing, false];
+        }
+
+        abort_if(
+            $data['montant_paye'] > $echeance->montant_paye,
+            422,
+            'Le montant dépasse le montant de l’échéance.'
+        );
+
+        $paiement = Paiement::create([
+            ...$data,
+            'montant_restant' => max(
+                0,
+                $echeance->montant_paye - $data['montant_paye']
+            ),
+        ]);
+
+        $credit = Credit::findOrFail($data['credit_id']);
+        $credit->update([
+            'termine' => $credit->echeances()
+                ->whereDoesntHave('paiement')
+                ->doesntExist() ? 1 : 0,
+        ]);
+
+        return [$paiement, true];
+    });
+
+    return response()->json($paiement, $created ? 201 : 200);
+});
+
 Route::get('/allprojets', function() {
     $data = [];
     

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Site extends Model
 {
@@ -11,6 +12,19 @@ class Site extends Model
 	public static function tab(){
 	return Site::pluck('nom','id')->prepend('','');
 }
+    public function projet() {
+	 return $this->belongsTo('\App\Models\Projet');
+    }
+
+    public function users(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            User::class,
+            'users_sites',
+            'site_id',
+            'user_id'
+        )->withTimestamps();
+    }
     public function localite() {
 	 return $this->belongsTo('\App\Models\Localite');
     }
@@ -22,8 +36,11 @@ class Site extends Model
 	 return $this->belongsToMany('\App\Models\Activite')->withPivot('budget');
     }
  
-     public function groupements() {
+    public function groupements() {
 	 return $this->hasMany('\App\Models\Groupement');
+    }
+    public function localites() {
+        return $this->belongsToMany('\App\Models\Localite', 'site_localite');
     }
     public function getBudgetAttribute(){
         $s=0;

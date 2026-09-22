@@ -2,7 +2,7 @@
       <div class="table-responsive">
         <table style="table-layout:fixed; width:100%" class="table table-bordered table-striped">
 <tr>
-	<th style="width:200px!important">Tache</th>
+	<th style="width:200px!important">Sous-activité</th>
 	
 	<th>Debut</th>
 	<th>Fin</th>

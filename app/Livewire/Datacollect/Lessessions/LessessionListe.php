@@ -17,7 +17,9 @@ public function updatedLocaliteId($value)
 {
     // Find the site that belongs to this localite
     if ($value) {
-        $site = \App\Models\Site::where('localite_id', $value)->first();
+        $site = \App\Models\Site::where('projet_id', session()->get('pid'))
+            ->where('localite_id', $value)
+            ->first();
         $this->site_id = $site ? $site->id : null;
         // Reset groupement when localite changes
         $this->groupement_id = null;
@@ -36,10 +38,12 @@ public function updatedSiteId($value)
     $this->page=1;
 }
 public function render() {
-    
-	$qr=\App\Models\Lessession::query();
+	$projetId = session()->get('pid');
+	$qr=\App\Models\Lessession::whereHas('groupement', function ($query) use ($projetId) {
+		$query->where('projet_id', $projetId);
+	});
 	$locs=[];
-	$projet=\App\Models\Projet::find(session()->get('pid',11));
+	$projet=\App\Models\Projet::find($projetId);
 	if($projet && $projet->sites) {
 	foreach($projet->sites as $s)
 	  $locs[$s->localite->id]=utf8_decode($s->localite->nom_localite);
@@ -49,12 +53,65 @@ public function render() {
      
      if($this->groupement_id!==null) 
      $qr->where('groupement_id',$this->groupement_id);
-     
+
+	$stats = $this->getProjectStats($projetId, clone $qr);
 	$this->lessessions=$qr->orderBy('date_session','desc')->paginate(10);
 	$this->unlessession=\App\Models\Lessession::find($this->sid);
 	$this->page=1;
 	return view('livewire.datacollect.lessessions.lessession-liste',
-	   ['lessessions'=>$this->lessessions,'lessession'=>$this->unlessession,'locs'=>$locs]);
+	   ['lessessions'=>$this->lessessions,'lessession'=>$this->unlessession,'locs'=>$locs,'stats'=>$stats]);
+}
+
+private function getProjectStats($projetId, $sessionsQuery): array
+{
+	$sitesQuery = \App\Models\Site::where('projet_id', $projetId);
+	$groupementsQuery = \App\Models\Groupement::where('projet_id', $projetId);
+
+	if ($this->localite_id) {
+		$sitesQuery->where('localite_id', $this->localite_id);
+		$groupementsQuery->whereHas('site', function ($query) {
+			$query->where('localite_id', $this->localite_id);
+		});
+	}
+
+	if ($this->site_id) {
+		$groupementsQuery->where('site_id', $this->site_id);
+	}
+
+	if ($this->groupement_id) {
+		$groupementsQuery->whereKey($this->groupement_id);
+	}
+
+	$groupements = $groupementsQuery->with('membres:id')->get();
+	$groupementIds = $groupements->pluck('id')->unique();
+	$membreIds = $groupements
+		->flatMap(fn ($groupement) => $groupement->membres->pluck('id'))
+		->unique();
+	$sessionIds = (clone $sessionsQuery)->pluck('id');
+	$donnees = \App\Models\MetaDonnee::whereIn('lessession_id', $sessionIds);
+	$participations = (clone $donnees)->count();
+	$sessions = (clone $sessionsQuery)->with('groupement.membres')->get();
+	$participantsAttendus = $sessions->sum(
+		fn ($session) => $session->groupement?->membres->count() ?? 0
+	);
+
+	return [
+		'sites' => $sitesQuery->distinct()->count('sites.id'),
+		'foyers' => $groupementIds->count(),
+		'membres' => $membreIds->count(),
+		'referes' => (clone $donnees)
+			->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(donnes, '$.refere')) = ?", ['Oui'])
+			->count(),
+		'croissance_normale' => (clone $donnees)
+			->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(donnes, '$.cs')) = ?", ['normal'])
+			->count(),
+		'retard_croissance' => (clone $donnees)
+			->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(donnes, '$.cs')) = ?", ['retard croissance'])
+			->count(),
+		'taux_participation' => $participantsAttendus > 0
+			? round(($participations / $participantsAttendus) * 100, 1)
+			: 0,
+	];
 }
  public function onGroupementUpdated()
     {
@@ -69,7 +126,9 @@ public function resetLessession() {
 	 $this->groupement_id  = '';
 }
 public function rea(){
-    	$this->lessessions=\App\Models\Lessession::orderBy('date_session','desc')->paginate(10);
+	$this->lessessions=\App\Models\Lessession::whereHas('groupement', function ($query) {
+		$query->where('projet_id', session()->get('pid'));
+	})->orderBy('date_session','desc')->paginate(10);
     	$this->render();
     //	dd('re');
       //return redirect(request()->header('Referer'));

@@ -1,26 +1,36 @@
 <?php
+
 namespace App\Models;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+
 use Illuminate\Database\Eloquent\Model;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Credit extends Model
 {
-	public $guarded=['id'];
+    protected $guarded = ['id'];
 
-	public static function tab(){
-	    return Projet::pluck('montant','id')->prepend('','');
-        }
-public function bailleur_projets(){
-	return $this->hasMany('\App\Models\BailleurProjet');
-}
-public function membres(){
-	return $this->hasMany('\App\Models\Membre');
-}
-public function echeances(){
-	return $this->hasMany('\App\Models\Echeance');
-}
-public function membre(){
-	return $this->belongsTo('\App\Models\Membre');
-}
+    protected static function booted(): void
+    {
+        static::created(function (Credit $credit): void {
+            $firstDate = Carbon::parse($credit->date_premiere_echeance);
 
+            for ($number = 0; $number < (int) $credit->nbre_echeance; $number++) {
+                $credit->echeances()->create([
+                    'date_echeance' => $firstDate->copy()->addMonthsNoOverflow($number),
+                    'montant_paye' => $credit->montant_echeance,
+                ]);
+            }
+        });
+    }
 
+    public function echeances(): HasMany
+    {
+        return $this->hasMany(Echeance::class);
+    }
+
+    public function membre(): BelongsTo
+    {
+        return $this->belongsTo(Membre::class);
+    }
 }

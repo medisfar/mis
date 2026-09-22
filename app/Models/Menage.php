@@ -20,5 +20,9 @@ public function toit() {
     public function localite() {
      return $this->belongsTo('\App\Models\Localite');
     }
+
+    public function projets() {
+     return $this->belongsToMany('\App\Models\Projet', 'menage_projet')->withTimestamps();
+    }
    
 }

@@ -88,14 +88,15 @@ class AuthController extends Controller
                 ], 401);
             }
 
-            $user = User::where('email',$request->email)->first();
-
-
+            $user = User::with('sites')->where('email',$request->email)->firstOrFail();
+            $user->tokens()->where('name', 'MOBILE APP')->delete();
 
             return response()->json([
                 'status' => true,
                 'message' => 'User Logged In Successfully',
-                'token' =>''// $user->createToken("API TOKEN")->plainTextToken
+                'token' => $user->createToken('MOBILE APP')->plainTextToken,
+                'user' => $user,
+                'site' => $user->sites->first(),
             ], 200);
 
         } catch (\Throwable $th) {

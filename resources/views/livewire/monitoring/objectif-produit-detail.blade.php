@@ -6,9 +6,9 @@
                 <tr>
                     <th>Projet</th>
                     <th>Activité</th>
-                    <th class="text-right">Budget activité</th>
+                    <th class="text-right">Budget activité (USD)</th>
                     <th class="text-right">Réalisé</th>
-                    <th class="text-right">Coût affecté</th>
+                    <th class="text-right">Coût affecté (USD)</th>
                     <th>Commentaire</th>
                 </tr>
             </thead>
@@ -17,9 +17,9 @@
                 <tr>
                     <td>{{ $contribution->activite?->composante?->projet?->libelle ?? 'Null' }}</td>
                     <td>{{ $contribution->activite?->activite ?? 'Null' }}</td>
-                    <td class="text-right">{{ number_format((float)($contribution->activite?->budget ?? 0), 0, ',', ' ') }}</td>
-                    <td class="text-right">{{ number_format((float)$contribution->indicateur_realise, 2, ',', ' ') }} {{ $contribution->unite }}</td>
-                    <td class="text-right">{{ number_format((float)$contribution->cout, 0, ',', ' ') }}</td>
+                    <td class="text-right">{{ number_format((float)($contribution->activite?->budget ?? 0), 0, ',', ' ') }} USD</td>
+                    <td class="text-right">{{ number_format((float)$contribution->indicateur_realise, 0, ',', ' ') }} {{ $contribution->unite }}</td>
+                    <td class="text-right">{{ number_format((float)$contribution->cout, 0, ',', ' ') }} USD</td>
                     <td>{{ $contribution->commentaire ?: 'Null' }}</td>
                 </tr>
             @empty
@@ -29,7 +29,7 @@
         </table>
     </div>
 
-    <h5>Sites d’exécution et tâches</h5>
+    <h5>Sites d’exécution et sous-activités</h5>
     @forelse($activites as $activite)
         <div class="card card-outline card-success mb-3">
             <div class="card-header py-2">
@@ -42,8 +42,8 @@
                         <tr>
                             <th>Site</th>
                             <th>Localité du site</th>
-                            <th>Tâche réalisée</th>
-                            <th class="text-right">Budget tâche</th>
+                            <th>Sous-activité réalisée</th>
+                            <th class="text-right">Budget sous-activité (USD)</th>
                             <th>Période</th>
                         </tr>
                     </thead>
@@ -55,7 +55,7 @@
                                 <td>{{ $site->nom ?: 'Null' }}</td>
                                 <td>{{ $site->localite?->nom_localite ?? 'Null' }}</td>
                                 <td>Null</td>
-                                <td class="text-right">0</td>
+                                <td class="text-right">0 USD</td>
                                 <td>Null</td>
                             </tr>
                         @else
@@ -64,7 +64,7 @@
                                     <td>{{ $site->nom ?: 'Null' }}</td>
                                     <td>{{ $site->localite?->nom_localite ?? 'Null' }}</td>
                                     <td>{{ $tache->tache }}</td>
-                                    <td class="text-right">{{ number_format((float)$tache->budget, 0, ',', ' ') }}</td>
+                                    <td class="text-right">{{ number_format((float)$tache->budget, 0, ',', ' ') }} USD</td>
                                     <td>{{ \Carbon\Carbon::parse($tache->date_debut)->format('d/m/Y') }} - {{ \Carbon\Carbon::parse($tache->date_fin)->format('d/m/Y') }}</td>
                                 </tr>
                             @endforeach

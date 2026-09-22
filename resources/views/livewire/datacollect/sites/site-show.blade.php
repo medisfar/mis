@@ -20,10 +20,15 @@
 	<td>{{$site->localite->nom_localite??''}}</td>
 	<td>{{$site->localite_id}}</td>
 </tr>
+<tr>
+    <th>Actions</th>
+    <td colspan="2">
+        <a class="btn btn-sm btn-primary" href="{{route('datacollect.sites')}}">Liste</a>
+        <a class="btn btn-sm btn-primary" href="{{route('datacollect.sites.edit',$site->id)}}"><i class="fas fa-edit"></i></a>
+        <button class="btn btn-sm btn-danger" wire:click="destroySite({{$site->id}})"><i class="fas fa-trash"></i></button>
+    </td>
+</tr>
 </table>
-<a class="btn btn-sm btn-primary" href="{{route('datacollect.sites')}}">Liste</a>
-<a class="btn btn-sm btn-primary" href="{{route('datacollect.sites.edit',$site->id)}}"><i class="fas fa-edit"></i></button>
- <button  class="btn btn-sm btn-danger" wire:click="destroySite({{$site->id}})"><i class="fas fa-trash"></i></button>  
 
 
  <br><br>

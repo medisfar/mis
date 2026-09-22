@@ -89,7 +89,7 @@
                     <div class="small-box bg-info"><div class="inner"><h3>{{ $nombreProduits }}</h3><p>Produits réalisés</p></div><div class="icon"><i class="fas fa-box-open"></i></div></div>
                 </div>
                 <div class="col-xl col-md-4 col-6">
-                    <div class="small-box bg-success"><div class="inner"><h3>{{ number_format($totalCout, 0, ',', ' ') }}</h3><p>Investissement total</p></div><div class="icon"><i class="fas fa-coins"></i></div></div>
+                    <div class="small-box bg-success"><div class="inner"><h3>{{ number_format($totalCout, 0, ',', ' ') }} <small>USD</small></h3><p>Investissement total</p></div><div class="icon"><i class="fas fa-coins"></i></div></div>
                 </div>
                 <div class="col-xl col-md-4 col-6">
                     <div class="small-box bg-warning"><div class="inner"><h3>{{ $nombreProjets }}</h3><p>Projets contributeurs</p></div><div class="icon"><i class="fas fa-project-diagram"></i></div></div>
@@ -138,7 +138,7 @@
                                     <div class="col"><small class="text-muted d-block">Activités</small><strong>{{ $stats['activites'] }}</strong></div>
                                     <div class="col"><small class="text-muted d-block">Sous-préfectures</small><strong>{{ $stats['ssprefectures'] }}</strong></div>
                                     <div class="col"><small class="text-muted d-block">Localités</small><strong>{{ $stats['localites'] }}</strong></div>
-                                    <div class="col-3"><small class="text-muted d-block">Investissement</small><strong>{{ number_format((float)$stats['cout'], 0, ',', ' ') }}</strong></div>
+                                    <div class="col-3"><small class="text-muted d-block">Investissement (USD)</small><strong>{{ number_format((float)$stats['cout'], 0, ',', ' ') }}</strong></div>
                                 </div>
                             </div>
                         </div>
@@ -173,7 +173,7 @@
                                                     <div class="col"><small class="text-muted d-block">Projets</small><strong>{{ $resultatStats['projets'] }}</strong></div>
                                                     <div class="col"><small class="text-muted d-block">Activités</small><strong>{{ $resultatStats['activites'] }}</strong></div>
                                                     <div class="col"><small class="text-muted d-block">Zones</small><strong>{{ $resultatStats['ssprefectures'] + $resultatStats['localites'] }}</strong></div>
-                                                    <div class="col-4"><small class="text-muted d-block">Investissement</small><strong>{{ number_format((float)$resultatStats['cout'], 0, ',', ' ') }}</strong></div>
+                                                    <div class="col-4"><small class="text-muted d-block">Investissement (USD)</small><strong>{{ number_format((float)$resultatStats['cout'], 0, ',', ' ') }}</strong></div>
                                                 </div>
                                             </div>
                                         </div>
@@ -195,10 +195,8 @@
                                                     <tr>
                                                         <th>Produit</th>
                                                         <th>Année</th>
-                                                        <th>Sous-préfecture</th>
-                                                        <th>Localité</th>
                                                         <th class="text-right">Réalisé</th>
-                                                        <th class="text-right">Coût</th>
+                                                        <th class="text-right">Coût (USD)</th>
                                                         <th class="text-center">Contributions</th>
                                                         <th>Action</th>
                                                     </tr>
@@ -208,10 +206,8 @@
                                                     <tr wire:key="produit-groupe-{{ md5($groupe->key) }}">
                                                         <td>{{ $groupe->produit?->description }}</td>
                                                         <td>{{ $groupe->periode }}</td>
-                                                        <td>{{ $groupe->ssprefecture?->nom_ssprefecture ?? 'Null' }}</td>
-                                                        <td>{{ $groupe->localite?->nom_localite ?? 'Null' }}</td>
-                                                        <td class="text-right"><strong>{{ number_format((float)$groupe->indicateur_realise, 2, ',', ' ') }}</strong> {{ $groupe->unite }}</td>
-                                                        <td class="text-right">{{ number_format((float)$groupe->cout, 0, ',', ' ') }}</td>
+                                                        <td class="text-right"><strong>{{ number_format((float)$groupe->indicateur_realise, 0, ',', ' ') }}</strong> {{ $groupe->unite }}</td>
+                                                        <td class="text-right">{{ number_format((float)$groupe->cout, 0, ',', ' ') }} USD</td>
                                                         <td class="text-center">{{ $groupe->nombre_activites }} activité(s)<br><small>{{ $groupe->nombre_projets }} projet(s)</small></td>
                                                         <td>
                                                             <button
@@ -232,7 +228,7 @@
                                                     </tr>
                                                 @empty
                                                     <tr>
-                                                        <td colspan="8" class="text-center text-muted py-3">
+                                                        <td colspan="6" class="text-center text-muted py-3">
                                                             Aucun produit réalisé pour ce résultat.
                                                         </td>
                                                     </tr>

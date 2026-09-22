@@ -15,7 +15,7 @@ public function render() {
 	$this->Documents=$qr->paginate(20);
 	if($this->sid!==null) 
 	$this->undocument=\App\Models\document::find($this->sid);
-	$this->createdocument($this->sid);	return view('livewire.reporting.Documents.document-add',
+	$this->createdocument($this->sid);	return view('livewire.reporting.documents.document-add',
 	   ['Documents'=>$this->Documents,'document'=>$this->undocument]);
 }
 

@@ -12,7 +12,7 @@ key: {{ rand(0,1000) }},
 params: {}
  }
 })">Ajouter</button><br><br><div class="table-responsive">
-<table  class="table table-bordered table-striped">
+<table class="table table-bordered table-striped program-table">
 <tr>
 	<th>Code</th>
 	<th>Nom_bailleur</th>

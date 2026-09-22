@@ -4,12 +4,10 @@ namespace App\Livewire\Projet;
 
 use App\Models\Activite;
 use App\Models\ActiviteProduit;
-use App\Models\Localite;
 use App\Models\Mission;
 use App\Models\Odd;
 use App\Models\Produit;
 use App\Models\Resultat;
-use Illuminate\Validation\Rule;
 use Livewire\Component;
 
 class ObjectifsTabs extends Component
@@ -26,8 +24,6 @@ class ObjectifsTabs extends Component
     public ?int $contributionId = null;
     public ?int $contribution_produit_id = null;
     public ?int $activite_id = null;
-    public ?int $ssprefecture_id = null;
-    public ?int $localite_id = null;
     public $indicateur_realise = null;
     public string $unite = '';
     public $cout = null;
@@ -141,6 +137,31 @@ class ObjectifsTabs extends Component
         $this->resetEditor();
     }
 
+    public function deleteProduit(int $id): void
+    {
+        $produit = Produit::withCount('contributions')->findOrFail($id);
+
+        if ($produit->contributions_count > 0) {
+            $this->addError(
+                'produit_suppression',
+                'Impossible de supprimer ce produit : il possède '.$produit->contributions_count
+                .' contribution(s). Supprimez d’abord ses contributions.'
+            );
+            return;
+        }
+
+        if ($this->editingId === $produit->id) {
+            $this->resetEditor();
+        }
+
+        if ($this->contribution_produit_id === $produit->id) {
+            $this->resetContribution();
+        }
+
+        $produit->delete();
+        session()->flash('objectifs_message', 'Produit supprimé.');
+    }
+
     public function editContribution(?int $id = null, ?int $produitId = null): void
     {
         $this->resetContribution();
@@ -149,21 +170,12 @@ class ObjectifsTabs extends Component
             $this->contributionId = $id;
             $this->contribution_produit_id = $contribution->produit_id;
             $this->activite_id = $contribution->activite_id;
-            $this->ssprefecture_id = $contribution->ssprefecture_id;
-            $this->localite_id = $contribution->localite_id;
-            $this->indicateur_realise = $contribution->indicateur_realise;
+            $this->indicateur_realise = (int) round((float) $contribution->indicateur_realise);
             $this->unite = $contribution->unite ?? '';
-            $this->cout = $contribution->cout;
+            $this->cout = (int) round((float) $contribution->cout);
             $this->commentaire = $contribution->commentaire ?? '';
         } else {
             $this->contribution_produit_id = $produitId;
-        }
-    }
-
-    public function updatedLocaliteId($value): void
-    {
-        if ($value) {
-            $this->ssprefecture_id = Localite::find($value)?->ssprefecture_id;
         }
     }
 
@@ -172,20 +184,23 @@ class ObjectifsTabs extends Component
         $data = $this->validate([
             'contribution_produit_id' => ['required', 'exists:produits,id'],
             'activite_id' => ['required', 'exists:activites,id'],
-            'ssprefecture_id' => ['required', 'exists:ssprefectures,id'],
-            'localite_id' => [
-                'nullable',
-                Rule::exists('localites', 'id')->where(
-                    fn ($query) => $query->where('ssprefecture_id', $this->ssprefecture_id)
-                ),
-            ],
-            'indicateur_realise' => ['required', 'numeric', 'min:0'],
+            'indicateur_realise' => ['required', 'integer', 'min:0'],
             'unite' => ['required', 'string', 'max:100'],
-            'cout' => ['required', 'numeric', 'min:0'],
+            'cout' => ['required', 'integer', 'min:0'],
             'commentaire' => ['nullable', 'string'],
         ]);
 
         $activite = Activite::findOrFail($data['activite_id']);
+        $projetId = (int) session()->get('pid', 0);
+
+        if ($projetId <= 0 || (int) $activite->composante?->projet_id !== $projetId) {
+            $this->addError(
+                'activite_id',
+                'L’activité contributrice doit appartenir au projet actuellement sélectionné.'
+            );
+            return;
+        }
+
         $dejaAffecte = ActiviteProduit::where('activite_id', $activite->id)
             ->when($this->contributionId, fn ($query) => $query->where('id', '!=', $this->contributionId))
             ->sum('cout');
@@ -198,7 +213,7 @@ class ObjectifsTabs extends Component
                     0,
                     ',',
                     ' '
-                ).').'
+                ).' USD).'
             );
             return;
         }
@@ -208,8 +223,6 @@ class ObjectifsTabs extends Component
             [
                 'produit_id' => $data['contribution_produit_id'],
                 'activite_id' => $data['activite_id'],
-                'ssprefecture_id' => $data['ssprefecture_id'],
-                'localite_id' => $data['localite_id'] ?: null,
                 'indicateur_realise' => $data['indicateur_realise'],
                 'unite' => $data['unite'],
                 'cout' => $data['cout'],
@@ -227,8 +240,6 @@ class ObjectifsTabs extends Component
         $this->contributionId = null;
         $this->contribution_produit_id = null;
         $this->activite_id = null;
-        $this->ssprefecture_id = null;
-        $this->localite_id = null;
         $this->indicateur_realise = null;
         $this->unite = '';
         $this->cout = null;
@@ -251,10 +262,18 @@ class ObjectifsTabs extends Component
             'produits' => Produit::with([
                 'resultat.mission',
                 'contributions.activite.composante.projet',
-                'contributions.ssprefecture',
-                'contributions.localite',
             ])->orderBy('description')->get(),
-            'activites' => Activite::with('composante.projet')->orderBy('activite')->get(),
+            'activites' => Activite::with('composante.projet')
+                ->when(
+                    session()->has('pid'),
+                    fn ($query) => $query->whereHas(
+                        'composante',
+                        fn ($composante) => $composante->where('projet_id', session()->get('pid'))
+                    ),
+                    fn ($query) => $query->whereRaw('1 = 0')
+                )
+                ->orderBy('activite')
+                ->get(),
         ]);
     }
 }

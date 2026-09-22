@@ -8,7 +8,7 @@
 <h3>Site {{$site->nom}}</h3>
 	<table>
 		<tr>
-			<th>Tache</th>
+			<th>Sous-activité</th>
 			<th>Buget</th>
 			<th>Engage</th>
 		</tr>

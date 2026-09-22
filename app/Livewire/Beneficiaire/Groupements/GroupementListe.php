@@ -10,13 +10,21 @@ use WithPagination;
 
        protected $paginationTheme = 'bootstrap';protected $listeners = ['groupementUpdate' => 'refresh'];
 public function refresh(){
-    $this->groupements = \App\Models\Groupement::orderBy('nom_groupe','asc')->paginate(20);
+    $this->groupements = \App\Models\Groupement::leftJoin('sites', 'sites.id', '=', 'groupements.site_id')
+        ->where('groupements.projet_id', session()->get('pid'))
+        ->select('groupements.*')
+        ->orderBy('sites.nom','asc')
+        ->orderBy('groupements.nom_groupe','asc')
+        ->paginate(20);
     $this->render();
 }
 public function render() {
-	$qr=\App\Models\Groupement::query();
-	if($this->search!==null) 
-	$qr=\App\Models\Groupement::where('nom_groupe','like',$this->search.'%');
+	$qr=\App\Models\Groupement::leftJoin('sites', 'sites.id', '=', 'groupements.site_id')
+        ->where('groupements.projet_id', session()->get('pid'))
+        ->select('groupements.*');
+	if($this->search!==null)
+	$qr->where('nom_groupe','like',$this->search.'%');
+	$qr->orderBy('sites.nom', 'asc')->orderBy('groupements.nom_groupe', 'asc');
 	$this->groupements=$qr->paginate(20);
 	if($this->sid!==null) 
 	$this->ungroupement=\App\Models\Groupement::find($this->sid);

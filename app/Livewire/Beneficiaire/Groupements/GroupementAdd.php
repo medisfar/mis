@@ -4,7 +4,15 @@ use Livewire\Component;
 use \App\Traits\GroupementTrait;
 use \App\Models\Groupement;
 class GroupementAdd extends Component {
-use GroupementTrait;public $listeners = ['valueUpdated'=>'updateValue'];
+use GroupementTrait;
+
+public $localite_id = null;
+public $listeners = ['valueUpdated'=>'updateValue'];
+
+public function mount(): void
+{
+    $this->projet_id = session()->get('pid');
+}
 
   public function updateValue($value){
        
@@ -19,7 +27,6 @@ public function render() {
 	$this->groupements=$qr->paginate(20);
 	if($this->sid!==null) 
 	$this->ungroupement=\App\Models\Groupement::find($this->sid);
-$this->projet_id=session()->get('pid');
 	$this->createGroupement($this->sid);	return view('livewire.beneficiaire.groupements.groupement-add',
 	   ['groupements'=>$this->groupements,'groupement'=>$this->ungroupement]);
 }
@@ -29,4 +36,5 @@ public function resetGroupement() {
 	 $this->site_id  = '';
 	 $this->statut  = '';
 }
+
 }

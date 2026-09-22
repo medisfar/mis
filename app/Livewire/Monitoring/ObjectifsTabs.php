@@ -91,8 +91,7 @@ class ObjectifsTabs extends Component
                 'produit.resultat.mission',
                 'produit.resultat.odds',
                 'activite.composante.projet',
-                'ssprefecture.prefecture.region',
-                'localite',
+                'activite.taches.site.localite.ssprefecture.prefecture.region',
             ])
             ->when($this->search, function ($query) {
                 $term = '%'.$this->search.'%';
@@ -122,18 +121,21 @@ class ObjectifsTabs extends Component
                 fn ($composante) => $composante->where('projet_id', $this->projet_id)
             ))
             ->when($this->region_id, fn ($query) => $query->whereHas(
-                'ssprefecture.prefecture',
+                'activite.taches.site.localite.ssprefecture.prefecture',
                 fn ($prefecture) => $prefecture->where('region_id', $this->region_id)
             ))
             ->when($this->prefecture_id, fn ($query) => $query->whereHas(
-                'ssprefecture',
+                'activite.taches.site.localite.ssprefecture',
                 fn ($ssprefecture) => $ssprefecture->where('prefecture_id', $this->prefecture_id)
             ))
-            ->when($this->ssprefecture_id, fn ($query) => $query->where(
-                'ssprefecture_id',
-                $this->ssprefecture_id
+            ->when($this->ssprefecture_id, fn ($query) => $query->whereHas(
+                'activite.taches.site.localite',
+                fn ($localite) => $localite->where('ssprefecture_id', $this->ssprefecture_id)
             ))
-            ->when($this->localite_id, fn ($query) => $query->where('localite_id', $this->localite_id))
+            ->when($this->localite_id, fn ($query) => $query->whereHas(
+                'activite.taches.site',
+                fn ($site) => $site->where('localite_id', $this->localite_id)
+            ))
             ->when($this->periode, fn ($query) => $query->whereHas(
                 'activite',
                 fn ($activite) => $activite->whereYear('date_fin', $this->periode)
@@ -147,8 +149,6 @@ class ObjectifsTabs extends Component
             optional($row->activite)->date_fin
                 ? \Carbon\Carbon::parse($row->activite->date_fin)->format('Y')
                 : null,
-            $row->ssprefecture_id,
-            $row->localite_id,
             $row->unite,
         ], JSON_UNESCAPED_UNICODE));
     }
@@ -174,8 +174,6 @@ class ObjectifsTabs extends Component
                         ? \Carbon\Carbon::parse($first->activite->date_fin)->format('Y')
                         : 'Null',
                     'periode_tri' => $first->activite?->date_fin ?: '0000-00-00',
-                    'ssprefecture' => $first->ssprefecture,
-                    'localite' => $first->localite,
                     'indicateur_realise' => $contributions->sum('indicateur_realise'),
                     'unite' => $first->unite,
                     'cout' => $contributions->sum('cout'),
@@ -191,6 +189,10 @@ class ObjectifsTabs extends Component
             $contributions = $groupes
                 ->flatMap(fn ($groupe) => $groupe->contributions)
                 ->unique('id');
+            $sites = $contributions
+                ->flatMap(fn ($row) => $row->activite?->taches?->pluck('site') ?? collect())
+                ->filter()
+                ->unique('id');
 
             return [
                 'produits' => $contributions->pluck('produit_id')->filter()->unique()->count(),
@@ -198,8 +200,10 @@ class ObjectifsTabs extends Component
                     ->map(fn ($row) => $row->activite?->composante?->projet?->id)
                     ->filter()->unique()->count(),
                 'activites' => $contributions->pluck('activite_id')->filter()->unique()->count(),
-                'ssprefectures' => $contributions->pluck('ssprefecture_id')->filter()->unique()->count(),
-                'localites' => $contributions->pluck('localite_id')->filter()->unique()->count(),
+                'ssprefectures' => $sites
+                    ->map(fn ($site) => $site->localite?->ssprefecture_id)
+                    ->filter()->unique()->count(),
+                'localites' => $sites->pluck('localite_id')->filter()->unique()->count(),
                 'cout' => $contributions->sum('cout'),
             ];
         };

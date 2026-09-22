@@ -16,34 +16,31 @@ params: {}
 
      <div class="row mb-3">
         <x-select nc="3" label="Localite" fd="localite_id" :options="$locs"></x-select>
-     <x-select nc="3" label="Site" fd="site_id" :options="\App\Models\Site::where('localite_id', $localite_id)->pluck('nom', 'id')"></x-select> 
+     <x-select nc="3" label="Site" fd="site_id" :options="\App\Models\Site::where('projet_id', session()->get('pid'))->where('localite_id', $localite_id)->pluck('nom', 'id')"></x-select>
         <x-select nc="3" label="Groupement" fd="groupement_id" 
-            :options="$site_id ? \App\Models\Groupement::where('site_id', $site_id)->pluck('nom_groupe', 'id') : []">
+            :options="$site_id ? \App\Models\Groupement::where('projet_id', session()->get('pid'))->where('site_id', $site_id)->pluck('nom_groupe', 'id') : []">
         </x-select>
        
  </div>
    
 <div class="row">
     <x-rowb 
-        label="{!! 'Sites:'.( $localite_id ? \App\Models\Site::where('localite_id', $localite_id)->count() : \App\Models\Site::count()) !!}" 
+        label="Sites: {{ $stats['sites'] }}"
         icon="bi bi-cpu" 
-        value="Foyers: {{ $localite_id ? \App\Models\Site::foyers($localite_id) : \App\Models\Site::foyers(0) }} "
+        value="Foyers: {{ $stats['foyers'] }}"
         unit=""
     />
-    @php $r=\DB::select("SELECT COUNT(*) as total FROM metadonnes WHERE JSON_EXTRACT(donnes, '$.refere') = 'Oui';"); @endphp
-     @php $c=\DB::select("SELECT COUNT(*) as total FROM metadonnes WHERE JSON_EXTRACT(donnes, '$.cs') = 'normal';"); @endphp
-     @php $rt=\DB::select("SELECT COUNT(*) as total FROM metadonnes WHERE JSON_EXTRACT(donnes, '$.cs') = 'retard croissance';"); @endphp
     <x-rowb 
-        label="Membres : {{ $localite_id ? \App\Models\Site::membres($localite_id) : \App\Models\Site::membres(0) }} " 
+        label="Membres : {{ $stats['membres'] }}"
         icon="bi bi-cash" 
-         value="refere: {{$r[0]->total}}"
+         value="Référés : {{ $stats['referes'] }}"
         unit=""
     />
     
     <x-rowb 
-        label="Cr normal: {{$c[0]->total}}" 
+        label="Cr normal : {{ $stats['croissance_normale'] }}"
         icon="bi bi-hdd-stack" 
-          value="Cr retard: {{$rt[0]->total}}" 
+          value="Cr retard : {{ $stats['retard_croissance'] }}"
          unit=""
        
     />
@@ -51,7 +48,7 @@ params: {}
     <x-rowb 
         label="taux participations" 
         icon="bi bi-people"
-        value="55"
+        value="{{ $stats['taux_participation'] }}"
         unit="%"
     />
 </div>

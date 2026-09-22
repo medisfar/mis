@@ -170,38 +170,20 @@
                         </h5>
                         @if($contribution_produit_id)
                             <div class="row">
-                                <div class="form-group col-md-6">
+                                <div class="form-group col-md-12">
                                     <label>Activité contributrice</label>
                                     <select class="form-control" wire:model="activite_id">
                                         <option value="">Sélectionner</option>
                                         @foreach($activites as $activite)
                                             <option value="{{ $activite->id }}">
-                                                {{ $activite->composante?->projet?->libelle }} — {{ $activite->activite }} (budget : {{ number_format($activite->budget, 0, ',', ' ') }})
+                                                {{ $activite->composante?->projet?->libelle }} — {{ $activite->activite }} (budget : {{ number_format($activite->budget, 0, ',', ' ') }} USD)
                                             </option>
                                         @endforeach
                                     </select>
                                 </div>
                                 <div class="form-group col-md-3">
-                                    <label>Sous-préfecture</label>
-                                    <select class="form-control" wire:model.live="ssprefecture_id">
-                                        <option value="">Sélectionner</option>
-                                        @foreach(\App\Models\Ssprefecture::orderBy('nom_ssprefecture')->get() as $ssp)
-                                            <option value="{{ $ssp->id }}">{{ $ssp->nom_ssprefecture }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div class="form-group col-md-3">
-                                    <label>Localité (facultatif)</label>
-                                    <select class="form-control" wire:model="localite_id">
-                                        <option value="">Null</option>
-                                        @foreach(\App\Models\Localite::when($ssprefecture_id, fn($q) => $q->where('ssprefecture_id', $ssprefecture_id))->orderBy('nom_localite')->get() as $localite)
-                                            <option value="{{ $localite->id }}">{{ $localite->nom_localite }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div class="form-group col-md-3">
                                     <label>Réalisé</label>
-                                    <input type="number" step="0.01" min="0" class="form-control" wire:model="indicateur_realise">
+                                    <input type="number" step="1" min="0" class="form-control" wire:model="indicateur_realise">
                                 </div>
                                 <div class="form-group col-md-3">
                                     <label>Unité</label>
@@ -209,7 +191,10 @@
                                 </div>
                                 <div class="form-group col-md-3">
                                     <label>Coût affecté</label>
-                                    <input type="number" step="0.01" min="0" class="form-control" wire:model="cout">
+                                    <div class="input-group">
+                                        <input type="number" step="1" min="0" class="form-control" wire:model="cout">
+                                        <div class="input-group-append"><span class="input-group-text">USD</span></div>
+                                    </div>
                                 </div>
                                 <div class="form-group col-md-3">
                                     <label>Commentaire</label>
@@ -234,27 +219,33 @@
                                 <button class="btn btn-sm btn-success" wire:click="editContribution(null, {{ $produit->id }})">
                                     <i class="fas fa-plus"></i> Ajouter une contribution
                                 </button>
+                                <button
+                                    type="button"
+                                    class="btn btn-sm btn-danger"
+                                    wire:confirm="Supprimer définitivement ce produit ?"
+                                    wire:click="deleteProduit({{ $produit->id }})"
+                                >
+                                    <i class="fas fa-trash"></i> Supprimer
+                                </button>
                             </div>
                         </div>
                         <div class="card-body p-0 table-responsive">
                             <table class="table table-sm table-striped mb-0">
-                                <thead><tr><th>Activité</th><th>Période</th><th>Sous-préfecture</th><th>Localité</th><th>Réalisé</th><th>Coût</th><th></th></tr></thead>
+                                <thead><tr><th>Activité</th><th>Période</th><th>Réalisé</th><th>Coût (USD)</th><th></th></tr></thead>
                                 <tbody>
                                 @forelse($produit->contributions as $contribution)
                                     <tr wire:key="contribution-{{ $contribution->id }}">
                                         <td>{{ $contribution->activite?->activite }}</td>
                                         <td>{{ $contribution->activite?->date_fin ? \Carbon\Carbon::parse($contribution->activite->date_fin)->format('m/Y') : 'Null' }}</td>
-                                        <td>{{ $contribution->ssprefecture?->nom_ssprefecture ?? 'Null' }}</td>
-                                        <td>{{ $contribution->localite?->nom_localite ?? 'Null' }}</td>
-                                        <td>{{ number_format((float)$contribution->indicateur_realise, 2, ',', ' ') }} {{ $contribution->unite }}</td>
-                                        <td>{{ number_format((float)$contribution->cout, 0, ',', ' ') }}</td>
+                                        <td>{{ number_format((float)$contribution->indicateur_realise, 0, ',', ' ') }} {{ $contribution->unite }}</td>
+                                        <td>{{ number_format((float)$contribution->cout, 0, ',', ' ') }} USD</td>
                                         <td class="text-nowrap">
                                             <button class="btn btn-xs btn-primary" wire:click="editContribution({{ $contribution->id }})"><i class="fas fa-edit"></i></button>
                                             <button class="btn btn-xs btn-danger" wire:confirm="Supprimer cette contribution ?" wire:click="deleteContribution({{ $contribution->id }})"><i class="fas fa-trash"></i></button>
                                         </td>
                                     </tr>
                                 @empty
-                                    <tr><td colspan="7" class="text-center text-muted">Aucune contribution saisie.</td></tr>
+                                    <tr><td colspan="5" class="text-center text-muted">Aucune contribution saisie.</td></tr>
                                 @endforelse
                                 </tbody>
                             </table>

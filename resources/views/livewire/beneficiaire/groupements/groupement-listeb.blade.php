@@ -3,7 +3,7 @@
 
   <div class="row mb-3">
         <x-select nc="3" label="Localite" fd="lid" :options="$locs"></x-select>
-     <x-select nc="3" label="Site" fd="siid" :options="\App\Models\Site::where('localite_id', $lid)->pluck('nom', 'id')"></x-select> 
+     <x-select nc="3" label="Site" fd="siid" :options="\App\Models\Site::where('projet_id', session()->get('pid'))->where('localite_id', $lid)->pluck('nom', 'id')"></x-select>
           
  </div>     
  

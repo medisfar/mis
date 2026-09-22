@@ -7,6 +7,9 @@
 <x-menu-link murl="{{url('/')}}/datacollect/sessions/tabs" mtitle="Data collect"/>
 <x-menu-link murl="{{url('/')}}/monitoring/" mtitle="Monitoring"/>
 <x-menu-link murl="{{url('/')}}/reporting" mtitle="Repporting"/>
+
+<x-menu-link murl="{{url('/')}}/microfinance/credits" mtitle="microfinance"/>
+<x-menu-link murl="{{url('/')}}/imp" mtitle="Import"/>
 <x-menu-link murl="{{url('/')}}/dashboard" mtitle="MIS Dashbord"/>
 <x-menu-link murl="{{url('/')}}/map" mtitle="Localistion"/>
 <!--"avancement/{{session()->get('pid')}}"  -->

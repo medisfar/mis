@@ -50,7 +50,7 @@
                     <tr>
                         <th>Site</th>
                         <th>Localité</th>
-                        <th>Tâche</th>
+                        <th>Sous-activité</th>
                         <th>Budget</th>
                         <th>Période</th>
                         <th>Avancement</th>
@@ -70,7 +70,7 @@
                         <tr>
                             <td>{{ $site->nom ?: '-' }}</td>
                             <td>{{ $site->localite->nom_localite ?? '-' }}</td>
-                            <td>{{ $tache?->tache ?? 'Aucune tâche' }}</td>
+                            <td>{{ $tache?->tache ?? 'Aucune sous-activité' }}</td>
                             <td>{{ $tache ? number_format((float) $tache->budget, 0, ',', ' ') : '-' }}</td>
                             <td>
                                 @if($tache)

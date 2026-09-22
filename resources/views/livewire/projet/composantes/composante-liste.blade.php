@@ -12,7 +12,7 @@ params: {}
  }
 })">Ajouter</button><br><br>
 <div class="table-responsive">
-  <table class="table table-bordered table-striped" style="text-align:center;">
+  <table class="table table-bordered table-striped program-table" style="text-align:center;">
   <tr>
       <th rowspan="2">Code</th>
       <th rowspan="2" width="40%">Description</th>

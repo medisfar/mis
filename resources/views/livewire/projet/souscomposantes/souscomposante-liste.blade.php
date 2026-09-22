@@ -17,7 +17,7 @@ params: {}
 <x-select nc="3" label="Composante" fd="cid" :options="\App\Models\Composante::where('projet_id',session()->get('pid'))->pluck('code','id')"></x-select>
 </div>
 <div class="table-responsive">
-<table  class="table table-bordered table-striped">
+<table class="table table-bordered table-striped program-table">
 <tr>
 	<th>Code</th>
 	<th width="40%">Description</th>

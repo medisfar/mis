@@ -4,11 +4,98 @@ th.nbre,
 table .nbre,
 table td.nbre,
 table th.nbre {
-    color:white !important;
+    color: #000 !important;
     text-align: right !important;
-    min-width: 1300px !important;
+    min-width: 130px !important;
     white-space: nowrap !important;
     vertical-align: top !important;
+}
+
+.activity-table {
+    width: 100%;
+    min-width: 1180px;
+    table-layout: auto;
+}
+
+.activity-table th {
+    background-color: #212529 !important;
+    color: #fff !important;
+    padding: 0.75rem 0.9rem;
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+.program-table th {
+    background-color: #212529 !important;
+    color: #fff !important;
+}
+
+.activity-table td {
+    padding: 0.75rem 0.9rem;
+    vertical-align: top;
+}
+
+.activity-table td.nbre {
+    width: 145px;
+    min-width: 145px !important;
+    white-space: nowrap !important;
+}
+
+.activity-table .activity-name {
+    min-width: 250px;
+    overflow-wrap: anywhere;
+}
+
+.activity-table .activity-dates {
+    min-width: 160px;
+    white-space: nowrap;
+}
+
+.activity-table .activity-progress,
+.activity-table .activity-status {
+    min-width: 125px;
+    white-space: nowrap;
+}
+
+.activity-table .activity-actions {
+    min-width: 155px;
+    white-space: nowrap;
+}
+
+.task-table {
+    min-width: 1150px;
+    table-layout: auto !important;
+}
+
+.task-table .task-progress-heading,
+.task-table .task-progress-cell {
+    min-width: 190px;
+    white-space: nowrap;
+}
+
+.task-progress-content {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+}
+
+.task-progress-content .progress {
+    width: 125px;
+    height: 12px;
+    margin: 0;
+    overflow: hidden;
+    background-color: #e9ecef;
+    border-radius: 999px;
+}
+
+.task-progress-content .progress-bar {
+    background-color: #198754;
+}
+
+.task-progress-value {
+    min-width: 42px;
+    color: #000;
+    font-weight: 600;
 }
 .entete th {
         background-color: transparent !important; /* Teal/Info color */

@@ -8,7 +8,7 @@
    
    ['id' => 'groupes', 'label' => 'Groupement','content'=>'',
     'component' => 'beneficiaire.groupements.groupement-liste'],
-    ['id' => 'menagses', 'label' => 'Menages','content'=>'',
+   ['id' => 'menagses', 'label' => 'Menages ('.$menagesCount.')','content'=>'',
     'component' => 'datacollect.menages.menage-liste'],
    ['id' => 'sites', 'label'=> 'Sites','content'=>'',
     'component' => 'datacollect.sites.site-liste'],

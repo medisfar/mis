@@ -16,6 +16,10 @@ public function menage(){
 	return $this->belongsTo('\App\Models\Menage');
 }
 
+public function credits(){
+	return $this->hasMany('\App\Models\Credit');
+}
+
 
 public function groupement(){
 	return $this->belongsToMany('\App\Models\Groupement');

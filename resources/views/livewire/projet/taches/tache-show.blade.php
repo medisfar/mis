@@ -1,10 +1,10 @@
-<x-slot name="titre">Taches</x-slot>
+<x-slot name="titre">Sous-activités</x-slot>
 
               <x-slot name="stitre">@include('livewire.projet.menu')</x-slot>
 <div>
 <table  class="table table-bordered">
 <tr>
-	<th>Tache</th>
+	<th>Sous-activité</th>
 	<td>{{$latache->tache}}</td>
 </tr>
 <tr>

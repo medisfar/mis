@@ -18,13 +18,15 @@ params: {}
 	<th>Type_point_focal</th>
 	<th>Nom_point_focal</th>
 	<th>Localite</th>
+	<th>Groupements</th>
 <th></th></tr>
 @foreach($sites as $item)
 <tr>
 	<td>{{$item->nom}}</td>
 	<td>{{$item->type_point_focal==1?'Adds':'Facilitatrices'}}</td>
 	<td>{{$item->nom_point_focal}}</td>
-	<td>{{$item->Localite->nom_localite??''}}</td>
+	<td>{{ $item->localites->pluck('nom_localite')->join(', ') ?: ($item->Localite->nom_localite ?? '') }}</td>
+	<td>{{$item->groupements_count}}</td>
 <td><button class="btn btn-sm btn-success"
 wire:click="$dispatch('show-modal', { 
 title: 'Modifier', 
@@ -35,6 +37,7 @@ key: {{ rand(0,1000) }},
 params: {id:{{$item->id}}}
  }
 })"><i class="fas fa-edit"></i></button> <button  class="btn btn-sm btn-danger" wire:confirm="êtes-vous sûr de vouloir supprimer" wire:click="destroySite({{$item->id}})"><i class="fas fa-trash"></i></button>  
+<a class="btn btn-sm btn-primary" href="{{route('datacollect.sites.show',$item->id)}}"><i class="fas fa-eye"></i></a>
 </td>
 </tr>
 @endforeach

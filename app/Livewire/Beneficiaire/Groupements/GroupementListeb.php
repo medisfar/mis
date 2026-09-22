@@ -10,13 +10,16 @@ use WithPagination;
 public $siid,$lid;
        protected $paginationTheme = 'bootstrap';protected $listeners = ['groupementUpdate' => 'refresh'];
 public function refresh(){
-    $this->groupements = \App\Models\Groupement::orderBy('nom_groupe','asc')->paginate(20);
+    $this->groupements = \App\Models\Groupement::where('projet_id', session()->get('pid'))
+        ->orderBy('nom_groupe','asc')
+        ->paginate(20);
     $this->render();
 }
 public function render() {
-	$qr=\App\Models\Groupement::query();
-	if($this->search!==null) 
-	$qr=\App\Models\Groupement::where('nom_groupe','like',$this->search.'%');
+	$projetId = session()->get('pid');
+	$qr=\App\Models\Groupement::where('projet_id', $projetId);
+	if($this->search!==null)
+	$qr->where('nom_groupe','like',$this->search.'%');
 	
 
 	if($this->siid!==null) 
@@ -26,9 +29,9 @@ public function render() {
 	$qr->wherehas('site',function($aar) use ($ll) { $aar->where('localite_id',$ll);});
 	if($this->sid!==null) 
 	$this->ungroupement=\App\Models\Groupement::find($this->sid);
-	$this->groupements=$qr->paginate(20);
+	$this->groupements=$qr->orderBy('nom_groupe', 'asc')->paginate(20);
 	$locs=[];
-	$projet=\App\Models\Projet::find(session()->get('pid',11));
+	$projet=\App\Models\Projet::find($projetId);
 	if($projet && $projet->sites) {
 	foreach($projet->sites as $s)
 	  $locs[$s->localite->id]=utf8_decode($s->localite->nom_localite);

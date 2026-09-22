@@ -25,6 +25,9 @@ public function composantes(){
 public function sites(){
 	return $this->hasMany('\App\Models\Site');
 }
+public function menages(){
+	return $this->belongsToMany('\App\Models\Menage', 'menage_projet')->withTimestamps();
+}
 public static function statuts(){
 	return [''=>'','Non commencé','En cours','Suspendu','Terminé'];
 }

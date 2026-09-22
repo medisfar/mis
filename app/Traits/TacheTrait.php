@@ -97,7 +97,7 @@ public function updateTache() {
    $untache = Tache::where('projet_id', session()->get('pid'))->find($this->sid);
 
    if (! $untache) {
-       $this->addError('tache', 'Cette tâche ne fait pas partie du projet sélectionné.');
+       $this->addError('tache', 'Cette sous-activité ne fait pas partie du projet sélectionné.');
        return;
    }
 
