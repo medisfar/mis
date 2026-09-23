@@ -8,6 +8,14 @@
 	<td>{{$groupement->nom_groupe}}</td>
 </tr>
 <tr>
+	<th>Mère conseillère</th>
+	<td>{{$groupement->mere_conseillere ?? ''}}</td>
+</tr>
+<tr>
+	<th>Nombre de membres</th>
+	<td>{{$groupement->membres->count()}}</td>
+</tr>
+<tr>
 	<th>Site</th>
 	<td>{{$groupement->site->nom??''}}</td>
 	<td>{{$groupement->site_id}}</td>

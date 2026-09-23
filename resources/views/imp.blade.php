@@ -13,25 +13,16 @@
         @csrf
         <button type="submit" style="background:#c62828;color:white;border:0;border-radius:4px;padding:10px 16px">Truncate and import CSV</button>
         <a href="{{ url('/dashboard') }}" style="display:inline-block;margin-left:8px;background:#2563eb;color:white;border-radius:4px;padding:10px 16px;text-decoration:none">Dashboard</a>
+        <a href="{{ url('/beneficiaire/csv-filter') }}" style="display:inline-block;margin-left:8px;background:#0f766e;color:white;border-radius:4px;padding:10px 16px;text-decoration:none">CSV Filter</a>
     </form>
-    <p class="muted">Sites: {{ count($dtt['sites']) }}</p>
-    @foreach($dtt['sites'] as $site)
-        <div class="card">
-          
-            <h2>Site: {{ $site['nom'] }} — {{ $site['facilitatrice'] }}</h2>
-            <table><thead><tr><th>Foyer</th><th>Mère conseillère</th><th>Ménages et membres</th></tr></thead><tbody>
-            @foreach($site['foyers'] as $foyer)
-            @php \App\Models\Groupement::create($foyer); @endphp
-                <tr><td>{{ $foyer['nom_groupe'] ?? $foyer['foyer'] ?? '' }}</td><td>{{ $foyer['mere_conseillere'] ?? '' }}</td><td>
-                    @foreach($foyer['menages'] as $menage)
-                        <table class="nested"><thead><tr><th>Ménage</th><th>Téléphone</th><th>Membres</th></tr></thead><tbody><tr><td>{{ $menage['chef'] }}</td><td>{{ $menage['tel'] }}</td><td>
-                            <table><thead><tr><th>Nom</th><th>Genre</th><th>Âge</th></tr></thead><tbody>@foreach($menage['membres'] as $membre)<tr><td>{{ $membre['nom'] }}</td><td>{{ $membre['genre'] }}</td><td>{{ $membre['age'] }}</td></tr>@endforeach</tbody></table>
-                        </td></tr></tbody></table>
-                    @endforeach
-                </td></tr>
-            @endforeach
-            </tbody></table>
-        </div>
-    @endforeach
+    <p class="muted">Mères conseillères: {{ count($mereConseillereMereCounts) }}</p>
+    <table>
+        <thead><tr><th>Mère conseillère</th><th>Nombre</th></tr></thead>
+        <tbody>
+        @foreach($mereConseillereMereCounts as $mereConseillere => $count)
+            <tr><td>{{ $mereConseillere }}</td><td>{{ $count }}</td></tr>
+        @endforeach
+        </tbody>
+    </table>
 </body>
 </html>

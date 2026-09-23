@@ -478,6 +478,7 @@ Route::get('/imp', function () {
     abort_unless(is_readable($path), 404, 'Import file not found.');
     $attrs = ['quartier' => 1, 'nom_enfant' => 2, 'nom_mere' => 3, 'site' => 7, 'foyer' => 6, 'facilitatrice' => 9, 'mere_conseillere' => 8, 'genre' => 11, 'age' => 12, 'tel' => 13];
     $dtt = ['sites' => []];
+    $mereConseillereMereCounts = [];
     $q = ['Wahdidaba' => 36, 'Wadidaba' => 36, 'Qurawil' => 33, 'Quarawil' => 33, 'Arhiba' => 7, 'Bâche à Eau' => 35, 'Bahache' => 35];
     $handle = fopen($path, 'r');
     $rowNumber = 0;
@@ -485,14 +486,16 @@ Route::get('/imp', function () {
         $rowNumber++;
         if ($rowNumber === 1) continue;
         $site = trim($data[$attrs['site']] ?? '');
-        $foyer = trim($data[$attrs['foyer']] ?? '');
+        $foyerCode = trim($data[$attrs['foyer']] ?? '');
         $mere = trim($data[$attrs['nom_mere']] ?? '');
-        if ($site === '' || $foyer === '' || $mere === '') continue;
+        $mereConseillere = trim($data[$attrs['mere_conseillere']] ?? '');
+        $foyer = strtolower(preg_replace('/\s+/', '-', $foyerCode . '-' . $mereConseillere));
+        if ($site === '' || $foyerCode === '' || $mere === '' || $mereConseillere === '') continue;
         if (!isset($dtt['sites'][$site])) {
             $dtt['sites'][$site] = ['nom' => $site, 'facilitatrice' => $data[$attrs['facilitatrice']], 'localite_id' => $q[$data[$attrs['quartier']]], 'lattitude' => 11.5, 'longitude' => 43.5, 'foyers' => []];
         }
         if (!isset($dtt['sites'][$site]['foyers'][$foyer])) {
-            $dtt['sites'][$site]['foyers'][$foyer] = ['nom_groupe' => $foyer, 'mere_conseillere' => $data[$attrs['mere_conseillere']] ?? '', 'menages' => []];
+            $dtt['sites'][$site]['foyers'][$foyer] = ['nom_groupe' => $foyer, 'mere_conseillere' => $foyer, 'menages' => []];
         }
         if (!isset($dtt['sites'][$site]['foyers'][$foyer]['menages'][$mere])) {
             $dtt['sites'][$site]['foyers'][$foyer]['menages'][$mere] = ['chef' => $mere, 'tel' => $data[$attrs['tel']] ?? '', 'membres' => []];
@@ -500,8 +503,13 @@ Route::get('/imp', function () {
         $dtt['sites'][$site]['foyers'][$foyer]['menages'][$mere]['membres'][] = ['nom' => $data[$attrs['nom_enfant']] ?? '', 'genre' => $data[$attrs['genre']] ?? '', 'age' => $data[$attrs['age']] ?? ''];
     }
     fclose($handle);
-   // dd($dtt);
-    return view('imp', ['dtt' => $dtt]);
+    foreach ($dtt['sites'] as $site) {
+        foreach ($site['foyers'] as $foyer) {
+            $mereConseillereMereCounts[$foyer['nom_groupe']] = count($foyer['menages']);
+        }
+    }
+    arsort($mereConseillereMereCounts);
+    return view('imp', compact('mereConseillereMereCounts'));
 });
 
 Route::post('/imp/import', function () {
@@ -520,8 +528,12 @@ Route::post('/imp/import', function () {
         $siteIds = $groupementIds = $menageIds = [];
         while (($data = fgetcsv($handle, 1000, ';')) !== false) {
             if (++$row === 1) continue;
-            $siteName = trim($data[$attrs['site']] ?? ''); $foyerName = trim($data[$attrs['foyer']] ?? ''); $chef = trim($data[$attrs['nom_mere']] ?? '');
-            if ($siteName === '' || $foyerName === '' || $chef === '') continue;
+            $siteName = trim($data[$attrs['site']] ?? '');
+            $foyerCode = trim($data[$attrs['foyer']] ?? '');
+            $chef = trim($data[$attrs['nom_mere']] ?? '');
+            $mereConseillere = trim($data[$attrs['mere_conseillere']] ?? '');
+            $foyerName = strtolower(preg_replace('/\s+/', '-', $foyerCode . '-' . $mereConseillere));
+            if ($siteName === '' || $foyerCode === '' || $chef === '' || $mereConseillere === '') continue;
             $localiteName = trim($data[$attrs['quartier']] ?? '');
             $localiteId = DB::table('localites')->where('nom_localite', $localiteName)->value('id')
                 ?? ($q[$localiteName] ?? 0);
@@ -535,7 +547,7 @@ Route::post('/imp/import', function () {
             }
             $groupementKey = $siteId.'|'.$foyerName;
             if (!isset($groupementIds[$groupementKey])) {
-                $groupementIds[$groupementKey] = DB::table('groupements')->insertGetId(['nom_groupe' => $foyerName, 'site_id' => $siteId, 'projet_id' => 11, 'statut' => 1, 'mere_conseillere' => $data[$attrs['mere_conseillere']] ?? '', 'created_at' => now(), 'updated_at' => now()]);
+                $groupementIds[$groupementKey] = DB::table('groupements')->insertGetId(['nom_groupe' => $foyerName, 'site_id' => $siteId, 'projet_id' => 11, 'statut' => 1, 'mere_conseillere' => $foyerName, 'created_at' => now(), 'updated_at' => now()]);
             }
             $groupementId = $groupementIds[$groupementKey];
             $menageKey = $groupementId.'|'.$chef;
@@ -745,6 +757,8 @@ Route::prefix('beneficiaire')->middleware('auth')->group(function(){Route::get('
 
 
 Route::prefix('beneficiaire')->middleware('auth')->group(function(){Route::get('/sites',App\Livewire\Beneficiaire\Sites\SiteListe::class)->name('beneficiaire.sites');Route::get('/sites/add',App\Livewire\Beneficiaire\Sites\SiteAdd::class)->name('beneficiaire.sites.add');Route::get('/sites/{id}/edit',App\Livewire\Beneficiaire\Sites\SiteEdit::class)->name('beneficiaire.sites.edit');Route::get('/sites/{id}/show',App\Livewire\Beneficiaire\Sites\SiteShow::class)->name('beneficiaire.sites.show');});
+
+Route::prefix('beneficiaire')->middleware('auth')->group(function(){Route::get('/csv-filter',App\Livewire\Beneficiaire\CsvFilter::class)->name('beneficiaire.csv-filter');});
 
 
 

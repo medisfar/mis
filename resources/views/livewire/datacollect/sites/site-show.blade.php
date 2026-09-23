@@ -32,32 +32,23 @@
 
 
  <br><br>
-    <table  class="table table-bordered table-striped">
-<tr>
-	<th>Menage</th>
-	<th>Genre</th>
-	<th>Nom</th>
-	<th>Date_naissance</th>
-	<th>Lien_parente</th>
-	<th>Enceinte</th>
-<th></th></tr>
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr style="background: purple; color: white;">
+                <th>Groupement</th>
+                <th>Mère conseillère</th>
+                <th>Nbre de membres</th>
+            </tr>
+        </thead>
+        <tbody>
 @foreach($site->groupements as $fy)
-<tr  style="background: purple; color: white;">
-	<td colspan="6">{{$fy->nom_groupe??''}}</td>
-</tr>
-@foreach($fy->membres as $item)
-<tr>
-	<td>{{$item->code??''}}</td>
-	<td>{{$item->genre==1?'M':'F'}}</td>
-	<td>{{$item->nom}}</td>
-	<td>{{$item->date_naissance}}</td>
-	<td>{{$item->lelien_parente}}</td>
-	<td>{{$item->enceinte==0?'Non':'Oui'}}</td>
-	
-</tr>
- @endforeach
-  @endforeach
-</table> 
-
+            <tr>
+                <td>{{$fy->nom_groupe??''}}</td>
+                <td>{{$fy->mere_conseillere??'Aucune'}}</td>
+                <td>{{$fy->membres->count()}}</td>
+            </tr>
+@endforeach
+        </tbody>
+    </table>
 
 </div>
