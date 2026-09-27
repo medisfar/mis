@@ -10,6 +10,7 @@
 
 <x-menu-link murl="{{url('/')}}/microfinance/credits" mtitle="microfinance"/>
 <x-menu-link murl="{{url('/')}}/imp" mtitle="Import"/>
+<x-menu-link murl="{{ route('membres.statistiques') }}" mtitle="Statistiques membres"/>
 <x-menu-link murl="{{url('/')}}/dashboard" mtitle="MIS Dashbord"/>
 <x-menu-link murl="{{url('/')}}/map" mtitle="Localistion"/>
 <!--"avancement/{{session()->get('pid')}}"  -->

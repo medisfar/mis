@@ -14,13 +14,15 @@
         <button type="submit" style="background:#c62828;color:white;border:0;border-radius:4px;padding:10px 16px">Truncate and import CSV</button>
         <a href="{{ url('/dashboard') }}" style="display:inline-block;margin-left:8px;background:#2563eb;color:white;border-radius:4px;padding:10px 16px;text-decoration:none">Dashboard</a>
         <a href="{{ url('/beneficiaire/csv-filter') }}" style="display:inline-block;margin-left:8px;background:#0f766e;color:white;border-radius:4px;padding:10px 16px;text-decoration:none">CSV Filter</a>
+        @auth<a href="{{ route('groupements.rename') }}" style="display:inline-block;margin-left:8px;background:#7c3aed;color:white;border-radius:4px;padding:10px 16px;text-decoration:none">Rename foyers</a>@endauth
+        @auth<a href="{{ route('membres.statistiques') }}" style="display:inline-block;margin-left:8px;background:#0369a1;color:white;border-radius:4px;padding:10px 16px;text-decoration:none">Statistiques membres</a>@endauth
     </form>
-    <p class="muted">Mères conseillères: {{ count($mereConseillereMereCounts) }}</p>
+    <p class="muted">Foyers: {{ count($foyerMenageCounts) }}</p>
     <table>
-        <thead><tr><th>Mère conseillère</th><th>Nombre</th></tr></thead>
+        <thead><tr><th>Foyer</th><th>Nombre de ménages</th></tr></thead>
         <tbody>
-        @foreach($mereConseillereMereCounts as $mereConseillere => $count)
-            <tr><td>{{ $mereConseillere }}</td><td>{{ $count }}</td></tr>
+        @foreach($foyerMenageCounts as $foyer => $count)
+            <tr><td>{{ $foyer }}</td><td>{{ $count }}</td></tr>
         @endforeach
         </tbody>
     </table>

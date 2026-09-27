@@ -20,6 +20,10 @@ public function credits(){
 	return $this->hasMany('\App\Models\Credit');
 }
 
+public function sessions(){
+	return $this->hasMany(MembreSession::class);
+}
+
 
 public function groupement(){
 	return $this->belongsToMany('\App\Models\Groupement');

@@ -478,7 +478,8 @@ Route::get('/imp', function () {
     abort_unless(is_readable($path), 404, 'Import file not found.');
     $attrs = ['quartier' => 1, 'nom_enfant' => 2, 'nom_mere' => 3, 'site' => 7, 'foyer' => 6, 'facilitatrice' => 9, 'mere_conseillere' => 8, 'genre' => 11, 'age' => 12, 'tel' => 13];
     $dtt = ['sites' => []];
-    $mereConseillereMereCounts = [];
+    $foyerMenageCounts = [];
+    $foyerNumbers = [];
     $q = ['Wahdidaba' => 36, 'Wadidaba' => 36, 'Qurawil' => 33, 'Quarawil' => 33, 'Arhiba' => 7, 'Bâche à Eau' => 35, 'Bahache' => 35];
     $handle = fopen($path, 'r');
     $rowNumber = 0;
@@ -489,27 +490,32 @@ Route::get('/imp', function () {
         $foyerCode = trim($data[$attrs['foyer']] ?? '');
         $mere = trim($data[$attrs['nom_mere']] ?? '');
         $mereConseillere = trim($data[$attrs['mere_conseillere']] ?? '');
-        $foyer = strtolower(preg_replace('/\s+/', '-', $foyerCode . '-' . $mereConseillere));
         if ($site === '' || $foyerCode === '' || $mere === '' || $mereConseillere === '') continue;
-        if (!isset($dtt['sites'][$site])) {
-            $dtt['sites'][$site] = ['nom' => $site, 'facilitatrice' => $data[$attrs['facilitatrice']], 'localite_id' => $q[$data[$attrs['quartier']]], 'lattitude' => 11.5, 'longitude' => 43.5, 'foyers' => []];
+        $localite = trim($data[$attrs['quartier']] ?? '');
+        $siteKey = $localite.'|'.$site;
+        $siteCode = strtolower(preg_replace('/\s+/', '', $site));
+        $foyerSourceKey = mb_strtolower($mereConseillere);
+        $foyerNumbers[$siteKey][$foyerSourceKey] ??= count($foyerNumbers[$siteKey] ?? []) + 1;
+        $foyer = Illuminate\Support\Str::slug($localite).'-'.$siteCode.'f'.$foyerNumbers[$siteKey][$foyerSourceKey];
+        if (!isset($dtt['sites'][$siteKey])) {
+            $dtt['sites'][$siteKey] = ['nom' => $site, 'facilitatrice' => $data[$attrs['facilitatrice']], 'localite_id' => $q[$localite], 'lattitude' => 11.5, 'longitude' => 43.5, 'foyers' => []];
         }
-        if (!isset($dtt['sites'][$site]['foyers'][$foyer])) {
-            $dtt['sites'][$site]['foyers'][$foyer] = ['nom_groupe' => $foyer, 'mere_conseillere' => $foyer, 'menages' => []];
+        if (!isset($dtt['sites'][$siteKey]['foyers'][$foyer])) {
+            $dtt['sites'][$siteKey]['foyers'][$foyer] = ['nom_groupe' => $foyer, 'mere_conseillere' => $mereConseillere, 'menages' => []];
         }
-        if (!isset($dtt['sites'][$site]['foyers'][$foyer]['menages'][$mere])) {
-            $dtt['sites'][$site]['foyers'][$foyer]['menages'][$mere] = ['chef' => $mere, 'tel' => $data[$attrs['tel']] ?? '', 'membres' => []];
+        if (!isset($dtt['sites'][$siteKey]['foyers'][$foyer]['menages'][$mere])) {
+            $dtt['sites'][$siteKey]['foyers'][$foyer]['menages'][$mere] = ['chef' => $mere, 'tel' => $data[$attrs['tel']] ?? '', 'membres' => []];
         }
-        $dtt['sites'][$site]['foyers'][$foyer]['menages'][$mere]['membres'][] = ['nom' => $data[$attrs['nom_enfant']] ?? '', 'genre' => $data[$attrs['genre']] ?? '', 'age' => $data[$attrs['age']] ?? ''];
+        $dtt['sites'][$siteKey]['foyers'][$foyer]['menages'][$mere]['membres'][] = ['nom' => $data[$attrs['nom_enfant']] ?? '', 'genre' => $data[$attrs['genre']] ?? '', 'age' => $data[$attrs['age']] ?? ''];
     }
     fclose($handle);
     foreach ($dtt['sites'] as $site) {
         foreach ($site['foyers'] as $foyer) {
-            $mereConseillereMereCounts[$foyer['nom_groupe']] = count($foyer['menages']);
+            $foyerMenageCounts[$foyer['nom_groupe']] = count($foyer['menages']);
         }
     }
-    arsort($mereConseillereMereCounts);
-    return view('imp', compact('mereConseillereMereCounts'));
+    uksort($foyerMenageCounts, 'strnatcasecmp');
+    return view('imp', compact('foyerMenageCounts'));
 });
 
 Route::post('/imp/import', function () {
@@ -518,21 +524,24 @@ Route::post('/imp/import', function () {
     $attrs = ['nom_enfant' => 2, 'nom_mere' => 3, 'site' => 7, 'foyer' => 6, 'facilitatrice' => 9, 'mere_conseillere' => 8, 'genre' => 11, 'age' => 12, 'tel' => 13, 'quartier' => 1];
     $q = ['Wahdidaba' => 36, 'Wadidaba' => 36, 'Qurawil' => 33, 'Quarawil' => 33, 'Arhiba' => 7, 'Bâche à Eau' => 35, 'Bahache' => 35];
     DB::statement('SET FOREIGN_KEY_CHECKS=0');
-        foreach (['groupement_membre', 'menage_projet', 'site_localite', 'membres', 'menages', 'groupements', 'sites'] as $table) {
+        foreach (['groupement_membre', 'membre_session', 'menage_projet', 'site_localite', 'membres', 'menages', 'groupements', 'sites'] as $table) {
         if (Schema::hasTable($table)) DB::table($table)->truncate();
     }
     DB::statement('SET FOREIGN_KEY_CHECKS=1');
 
     DB::transaction(function () use ($path, $attrs, $q) {
-        $handle = fopen($path, 'r'); $row = 0;
+        $handle = fopen($path, 'r'); $row = 0; $headers = [];
         $siteIds = $groupementIds = $menageIds = [];
+        $foyerNumbers = [];
         while (($data = fgetcsv($handle, 1000, ';')) !== false) {
-            if (++$row === 1) continue;
+            if (++$row === 1) {
+                $headers = $data;
+                continue;
+            }
             $siteName = trim($data[$attrs['site']] ?? '');
             $foyerCode = trim($data[$attrs['foyer']] ?? '');
             $chef = trim($data[$attrs['nom_mere']] ?? '');
             $mereConseillere = trim($data[$attrs['mere_conseillere']] ?? '');
-            $foyerName = strtolower(preg_replace('/\s+/', '-', $foyerCode . '-' . $mereConseillere));
             if ($siteName === '' || $foyerCode === '' || $chef === '' || $mereConseillere === '') continue;
             $localiteName = trim($data[$attrs['quartier']] ?? '');
             $localiteId = DB::table('localites')->where('nom_localite', $localiteName)->value('id')
@@ -542,12 +551,16 @@ Route::post('/imp/import', function () {
                 $siteIds[$siteKey] = DB::table('sites')->insertGetId(['nom' => $siteName, 'type_point_focal' => 2, 'nom_point_focal' => $data[$attrs['facilitatrice']] ?? '', 'localite_id' => $localiteId, 'projet_id' => 11, 'created_at' => now(), 'updated_at' => now()]);
             }
             $siteId = $siteIds[$siteKey];
+            $siteCode = strtolower(preg_replace('/\s+/', '', $siteName));
+            $foyerSourceKey = mb_strtolower($mereConseillere);
+            $foyerNumbers[$siteKey][$foyerSourceKey] ??= count($foyerNumbers[$siteKey] ?? []) + 1;
+            $foyerName = Illuminate\Support\Str::slug($localiteName).'-'.$siteCode.'f'.$foyerNumbers[$siteKey][$foyerSourceKey];
             if ($localiteId && Schema::hasTable('site_localite')) {
                 DB::table('site_localite')->insertOrIgnore(['site_id' => $siteId, 'localite_id' => $localiteId, 'created_at' => now(), 'updated_at' => now()]);
             }
             $groupementKey = $siteId.'|'.$foyerName;
             if (!isset($groupementIds[$groupementKey])) {
-                $groupementIds[$groupementKey] = DB::table('groupements')->insertGetId(['nom_groupe' => $foyerName, 'site_id' => $siteId, 'projet_id' => 11, 'statut' => 1, 'mere_conseillere' => $foyerName, 'created_at' => now(), 'updated_at' => now()]);
+                $groupementIds[$groupementKey] = DB::table('groupements')->insertGetId(['nom_groupe' => $foyerName, 'site_id' => $siteId, 'projet_id' => 11, 'statut' => 1, 'mere_conseillere' => $mereConseillere, 'created_at' => now(), 'updated_at' => now()]);
             }
             $groupementId = $groupementIds[$groupementKey];
             $menageKey = $groupementId.'|'.$chef;
@@ -560,7 +573,22 @@ Route::post('/imp/import', function () {
             if ($newMenage && Schema::hasTable('menage_projet')) {
                 DB::table('menage_projet')->insert(['menage_id' => $menageId, 'projet_id' => 11, 'created_at' => now(), 'updated_at' => now()]);
             }
-            $membreId = DB::table('membres')->insertGetId(['menage_id' => $menageId, 'genre' => (int) ($data[$attrs['genre']] ?? 0), 'nom' => $data[$attrs['nom_enfant']] ?? '', 'date_naissance' => '1900-01-01', 'lien_parente' => 2, 'enceinte' => 0, 'created_at' => now(), 'updated_at' => now()]);
+            $donneesImportees = [];
+            foreach (array_slice($headers, 12, null, true) as $columnIndex => $header) {
+                $header = trim($header) ?: 'Colonne '.($columnIndex + 1);
+                $donneesImportees[$header] = ($data[$columnIndex] ?? '') !== ''
+                    ? $data[$columnIndex]
+                    : null;
+            }
+            $membre = ['menage_id' => $menageId, 'genre' => (int) ($data[$attrs['genre']] ?? 0), 'nom' => $data[$attrs['nom_enfant']] ?? '', 'date_naissance' => '1900-01-01', 'lien_parente' => 2, 'enceinte' => 0, 'created_at' => now(), 'updated_at' => now()];
+            $membreId = DB::table('membres')->insertGetId($membre);
+            DB::table('membre_session')->insert([
+                'membre_id' => $membreId,
+                'date_session' => '2026-01-01',
+                'donnees' => json_encode($donneesImportees, JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
             DB::table('groupement_membre')->insert(['groupement_id' => $groupementId, 'membre_id' => $membreId]);
         }
         fclose($handle);
@@ -568,6 +596,237 @@ Route::post('/imp/import', function () {
     return redirect('/imp')->with('status', 'Import completed.');
 })->name('imp.import');
 Route::get('/imp/import', fn () => redirect('/imp'));
+
+Route::middleware('auth')->group(function () {
+    Route::get('/membres/statistiques', function (Request $request) {
+        $filters = $request->validate([
+            'member_id' => ['nullable', 'integer', 'exists:membres,id'],
+            'field' => ['nullable', 'string'],
+        ]);
+        $selectedMemberId = isset($filters['member_id']) ? (int) $filters['member_id'] : null;
+        $sessionQuery = DB::table('membre_session');
+        if ($selectedMemberId) {
+            $sessionQuery->where('membre_id', $selectedMemberId);
+        }
+        $rows = (clone $sessionQuery)->pluck('donnees');
+
+        $memberData = $rows->map(function ($json) {
+            if (is_array($json)) return $json;
+            $decoded = json_decode($json, true);
+            return is_array($decoded) ? $decoded : [];
+        });
+        $fields = $memberData
+            ->flatMap(fn ($data) => array_keys($data))
+            ->unique()
+            ->sort(SORT_NATURAL | SORT_FLAG_CASE)
+            ->values();
+
+        $selectedField = $filters['field'] ?? '';
+        if ($selectedField !== '' && ! $fields->containsStrict($selectedField)) {
+            abort(422, 'Champ statistique invalide.');
+        }
+
+        $statistics = collect();
+        $numericSummary = null;
+        if ($selectedField !== '') {
+            $values = $memberData->map(fn ($data) => $data[$selectedField] ?? null);
+            $statistics = $values
+                ->map(fn ($value) => $value === null || trim((string) $value) === '' ? '(Vide)' : trim((string) $value))
+                ->countBy()
+                ->sortDesc()
+                ->map(fn ($count, $value) => [
+                    'value' => $value,
+                    'count' => $count,
+                    'percentage' => $values->count() > 0 ? round(($count / $values->count()) * 100, 1) : 0,
+                ])->values();
+
+            $numericValues = $values
+                ->filter(fn ($value) => $value !== null && trim((string) $value) !== '')
+                ->map(fn ($value) => str_replace(',', '.', trim((string) $value)))
+                ->filter(fn ($value) => is_numeric($value))
+                ->map(fn ($value) => (float) $value);
+            $nonEmptyCount = $values->filter(fn ($value) => $value !== null && trim((string) $value) !== '')->count();
+            if ($nonEmptyCount > 0 && $numericValues->count() === $nonEmptyCount) {
+                $numericSummary = [
+                    'minimum' => $numericValues->min(),
+                    'maximum' => $numericValues->max(),
+                    'average' => round($numericValues->average(), 2),
+                ];
+            }
+        }
+
+        $sessions = (clone $sessionQuery)
+            ->join('membres', 'membres.id', '=', 'membre_session.membre_id')
+            ->select('membre_session.*', 'membres.nom as membre_nom')
+            ->orderByDesc('membre_session.date_session')
+            ->orderByDesc('membre_session.id')
+            ->paginate(20)
+            ->withQueryString();
+
+        return view('membres-statistiques', [
+            'fields' => $fields,
+            'selectedField' => $selectedField,
+            'selectedMemberId' => $selectedMemberId,
+            'members' => DB::table('membres')->orderBy('nom')->get(['id', 'nom']),
+            'sessions' => $sessions,
+            'statistics' => $statistics,
+            'numericSummary' => $numericSummary,
+            'membersWithData' => (clone $sessionQuery)->distinct()->count('membre_id'),
+        ]);
+    })->name('membres.statistiques');
+
+    Route::post('/membres/statistiques/sessions', function (Request $request) {
+        $data = $request->validate([
+            'membre_id' => ['required', 'integer', 'exists:membres,id'],
+            'date_session' => ['required', 'date'],
+            'donnees' => ['required', 'json'],
+        ]);
+        $data['donnees'] = json_encode(json_decode($data['donnees'], true), JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
+        $data['created_at'] = now();
+        $data['updated_at'] = now();
+        DB::table('membre_session')->insert($data);
+
+        return redirect()->route('membres.statistiques', ['member_id' => $data['membre_id']])
+            ->with('status', 'Session ajoutée avec succès.');
+    })->name('membres.sessions.store');
+
+    Route::put('/membres/statistiques/sessions/{session}', function (Request $request, int $session) {
+        abort_unless(DB::table('membre_session')->where('id', $session)->exists(), 404);
+        $data = $request->validate([
+            'membre_id' => ['required', 'integer', 'exists:membres,id'],
+            'date_session' => ['required', 'date'],
+            'donnees' => ['required', 'json'],
+        ]);
+        $data['donnees'] = json_encode(json_decode($data['donnees'], true), JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
+        $data['updated_at'] = now();
+        DB::table('membre_session')->where('id', $session)->update($data);
+
+        return redirect()->route('membres.statistiques', ['member_id' => $data['membre_id']])
+            ->with('status', 'Session modifiée avec succès.');
+    })->name('membres.sessions.update');
+
+    Route::delete('/membres/statistiques/sessions/{session}', function (int $session) {
+        abort_unless(DB::table('membre_session')->where('id', $session)->delete(), 404);
+
+        return redirect()->route('membres.statistiques')->with('status', 'Session supprimée.');
+    })->name('membres.sessions.destroy');
+
+    Route::get('/groupements/rename', function () {
+        $sites = DB::table('sites as s')
+            ->leftJoin('localites as l', 'l.id', '=', 's.localite_id')
+            ->select('s.id', 's.nom', 'l.nom_localite')
+            ->get()->all();
+        usort($sites, fn ($left, $right) => strnatcasecmp(
+            ($left->nom_localite ?? '').' '.$left->nom,
+            ($right->nom_localite ?? '').' '.$right->nom
+        ));
+
+        $renames = [];
+        foreach ($sites as $site) {
+            $siteCode = strtolower(preg_replace('/\s+/', '', trim($site->nom)));
+            $prefix = Illuminate\Support\Str::slug($site->nom_localite ?: 'localite-'.$site->id).'-'.$siteCode;
+            $groupements = DB::table('groupements')
+                ->where('site_id', $site->id)
+                ->orderBy('id')
+                ->get(['id', 'nom_groupe', 'mere_conseillere'])
+                ->groupBy(fn ($groupement) => mb_strtolower(preg_replace('/^f\d+-/i', '', $groupement->mere_conseillere)));
+
+            foreach ($groupements->values() as $index => $foyers) {
+                $keeper = $foyers->first();
+                $renames[] = [
+                    'id' => $keeper->id,
+                    'site' => $site->nom.' — '.($site->nom_localite ?? 'Sans localité'),
+                    'current' => $foyers->pluck('nom_groupe')->implode(', '),
+                    'proposed' => $prefix.'f'.($index + 1),
+                    'merge_count' => $foyers->count() - 1,
+                ];
+            }
+        }
+
+        $nameCounts = array_count_values(array_column($renames, 'proposed'));
+        $duplicateNames = array_keys(array_filter($nameCounts, fn ($count) => $count > 1));
+
+        return view('groupements-rename', compact('renames', 'duplicateNames'));
+    })->name('groupements.rename');
+
+    Route::post('/groupements/rename', function () {
+        $result = DB::transaction(function () {
+            $sites = DB::table('sites as s')
+                ->leftJoin('localites as l', 'l.id', '=', 's.localite_id')
+                ->select('s.id', 's.nom', 'l.nom_localite')
+                ->get()->all();
+            usort($sites, fn ($left, $right) => strnatcasecmp(
+                ($left->nom_localite ?? '').' '.$left->nom,
+                ($right->nom_localite ?? '').' '.$right->nom
+            ));
+            $renames = [];
+            $duplicates = [];
+
+            foreach ($sites as $site) {
+                $siteCode = strtolower(preg_replace('/\s+/', '', trim($site->nom)));
+                $prefix = Illuminate\Support\Str::slug($site->nom_localite ?: 'localite-'.$site->id).'-'.$siteCode;
+                $groupements = DB::table('groupements')
+                    ->where('site_id', $site->id)
+                    ->orderBy('id')
+                    ->get(['id', 'mere_conseillere'])
+                    ->groupBy(fn ($groupement) => mb_strtolower(preg_replace('/^f\d+-/i', '', $groupement->mere_conseillere)));
+
+                foreach ($groupements->values() as $index => $foyers) {
+                    $keeper = $foyers->first();
+                    $renames[$keeper->id] = $prefix.'f'.($index + 1);
+                    foreach ($foyers->slice(1) as $duplicate) {
+                        $duplicates[$duplicate->id] = $keeper->id;
+                    }
+                }
+            }
+
+            $nameCounts = array_count_values(array_values($renames));
+            $duplicateNames = array_keys(array_filter($nameCounts, fn ($count) => $count > 1));
+            if ($duplicateNames !== []) {
+                throw Illuminate\Validation\ValidationException::withMessages([
+                    'names' => 'Noms en double détectés : '.implode(', ', $duplicateNames),
+                ]);
+            }
+
+            foreach ($duplicates as $duplicateId => $keeperId) {
+                if (Schema::hasTable('groupement_membre')) {
+                    $memberIds = DB::table('groupement_membre')->where('groupement_id', $duplicateId)->pluck('membre_id');
+                    foreach ($memberIds as $memberId) {
+                        DB::table('groupement_membre')->insertOrIgnore([
+                            'groupement_id' => $keeperId,
+                            'membre_id' => $memberId,
+                        ]);
+                    }
+                    DB::table('groupement_membre')->where('groupement_id', $duplicateId)->delete();
+                }
+                foreach (['donnees', 'lessessions', 'meres'] as $table) {
+                    if (Schema::hasTable($table) && Schema::hasColumn($table, 'groupement_id')) {
+                        DB::table($table)->where('groupement_id', $duplicateId)->update(['groupement_id' => $keeperId]);
+                    }
+                }
+                DB::table('groupements')->where('id', $duplicateId)->delete();
+            }
+
+            foreach ($renames as $id => $name) {
+                DB::table('groupements')->where('id', $id)->update([
+                    'nom_groupe' => '__rename__'.$id,
+                    'updated_at' => now(),
+                ]);
+            }
+            foreach ($renames as $id => $name) {
+                DB::table('groupements')->where('id', $id)->update([
+                    'nom_groupe' => $name,
+                    'updated_at' => now(),
+                ]);
+            }
+
+            return ['renamed' => count($renames), 'merged' => count($duplicates)];
+        });
+
+        return redirect()->route('groupements.rename')
+            ->with('status', $result['renamed'].' foyers renommés et '.$result['merged'].' doublons fusionnés.');
+    })->name('groupements.rename.apply');
+});
 
 Route::middleware([
     'auth:sanctum',
