@@ -19,6 +19,46 @@ Laravel is a web application framework with expressive, elegant syntax. We belie
 - [Robust background job processing](https://laravel.com/docs/queues).
 - [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
 
+## Project access and deployment
+
+When no project-specific deployment instructions exist, use the access methods below. Never store passwords, private-key contents, API tokens, or `.env` secrets in this repository.
+
+### GitHub access
+
+- GitHub account: `medisfar`
+- SSH identity: `/home/pchp/.ssh/id_ed25519`
+- Remote format: `git@github.com:OWNER/REPOSITORY.git`
+- Verify authentication: `ssh -T -i /home/pchp/.ssh/id_ed25519 -o IdentitiesOnly=yes git@github.com`
+
+Configure a repository with:
+
+```bash
+git remote set-url origin git@github.com:OWNER/REPOSITORY.git
+git config core.sshCommand "ssh -i /home/pchp/.ssh/id_ed25519 -o IdentitiesOnly=yes"
+```
+
+### Appsor VPS access
+
+- Host: `185.182.187.228`
+- SSH user: `deploy`
+- SSH identity: `/home/pchp/.ssh/id_ed25519_appsor`
+- MIS deployment path: `/var/www/mis`
+
+Connect with:
+
+```bash
+ssh -i /home/pchp/.ssh/id_ed25519_appsor deploy@185.182.187.228
+```
+
+### Required workflow
+
+1. Read the project README and any `VPS.md` or `AGENTS.md` before changing or deploying files.
+2. Confirm the local project path, VPS path, Git branch, and database environment independently.
+3. Prefer Git-based deployments. Use direct `scp` only for an explicitly requested emergency deployment.
+4. Before migrations, create a recoverable backup and verify the target database is not production unless production deployment was explicitly requested.
+5. After deployment, verify migrations, application routes, cache clearing, and the live URL separately.
+6. Report status precisely as: local change, Git synchronization, VPS deployment, database migration, and live verification.
+
 Laravel is accessible, powerful, and provides tools required for large, robust applications.
 
 ## Learning Laravel
